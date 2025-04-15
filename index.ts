@@ -1,4 +1,4 @@
-// @ts-ignore: Ignore declaration errors
+
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
 import Agent from "./Agent/Agent";
 
