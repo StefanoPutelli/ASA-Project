@@ -1,71 +1,13 @@
-/**
- * Describes the shape of time information provided in tile/you events.
- */
-interface TimeInfo {
-  ms: number;
-  frame: number;
-}
-/**
- * Describes the shape of tile data.
- */
-interface Tile {
-  x: number;
-  y: number;
-  type: number;
-}
 
-/**
- * Describes the shape of a parcel in the "parcels sensing" event.
- */
-interface Parcel {
-  id: string;
-  x: number;
-  y: number;
-  carriedBy: string | null;
-  reward: number;
-}
-
-/**
- * Describes the shape of an EnemyAgent in the "EnemyAgents sensing" event.
- */
-interface EnemyAgent {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  score: number;
-  penalty: number;
-}
-
-/**
- * Describes the shape of the "you" event payload.
- */
-interface You {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  score: number;
-  penalty: number;
-}
-
-interface Map {
-  x: number;
-  y: number;
-  tile: Tile[];
-}
-
-/**
- * Generic signature for a client or event emitter that can register event handlers.
- * Adjust as needed for your actual client implementation.
- */
-interface EventClient {
-  on(eventName: 'tile', listener: (tile: Tile, timeInfo: TimeInfo) => void): void;
-  on(eventName: 'you', listener: (you: You, timeInfo: TimeInfo) => void): void;
-  on(eventName: 'parcels sensing', listener: (parcels: Parcel[], timeInfo: TimeInfo) => void): void;
-  on(eventName: 'EnemyAgents sensing', listener: (EnemyAgents: EnemyAgent[], timeInfo: TimeInfo) => void): void;
-  on(eventName: 'map', listener: (x: number, y: number, tiles: Tile[]) => void): void;
-}
+import {
+  Tile,
+  You,
+  TimeInfo,
+  Parcel,
+  EnemyAgent,
+  GameMap, 
+  EventClient
+} from './interfaces/AgentInterface';
 
 /**
  * Wraps all event data that we want to store. The constructor
@@ -89,7 +31,7 @@ export default class Agent {
   /**
    * Stores the latest "map" event data (could be a number, object, etc.).
    */
-  public mapData: Map = {
+  public mapData: GameMap = {
     x: 0,
     y: 0,
     tile: [],
@@ -100,22 +42,6 @@ export default class Agent {
    */
   constructor(private client: EventClient) {
     this.setupListeners();
-  }
-
-  public displayData(): void {
-    console.log("== Agent Data ==");
-    
-    console.log("You:");
-    console.log(this.you ? JSON.stringify(this.you, null, 2) : "No data available");
-    
-    console.log("Parcels Sensing:");
-    console.log(JSON.stringify(this.parcelsSensing, null, 2));
-    
-    console.log("Enemy Agents Sensing:");
-    console.log(JSON.stringify(this.EnemyAgentsSensing, null, 2));
-    
-    console.log("Map Data:");
-    console.log(JSON.stringify(this.mapData, null, 2));
   }
 
   public renderMap(): void {
@@ -164,7 +90,7 @@ export default class Agent {
 
     // Render the grid to a string for visual inspection.
     const visual = grid.map(row => row.join(' ')).join('\n');
-    console.log("Map Visual Representation:");
+    console.log("GameMap Visual Representation:");
     console.log(visual);
   }
   /**
