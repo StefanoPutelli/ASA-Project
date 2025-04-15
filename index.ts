@@ -1,6 +1,6 @@
 // @ts-ignore: Ignore declaration errors
 import { DeliverooApi } from "@unitn-asa/deliveroo-js-client";
-import Agent from "./agent/Agent";
+import Agent from "./Agent/Agent";
 
 const client = new DeliverooApi(
     'http://localhost:8080',
@@ -9,7 +9,5 @@ const client = new DeliverooApi(
 
 const agent = new Agent(client);
 
-setInterval(() => {
-    agent.renderMap();
-}, 1000);
+agent.agentLoop();
 

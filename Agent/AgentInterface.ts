@@ -55,14 +55,27 @@ export interface GameMap {
     tile: Tile[];
 }
 
+export interface AgentInterface {
+    client: any;
+    you: {
+        you: You;
+        timeInfo: TimeInfo;
+    };
+    parcelsSensing: Parcel[];
+    EnemyAgentsSensing: EnemyAgent[];
+    mapData: GameMap;
+}
+
+
+
 /**
  * Generic signature for a client or event emitter that can register event handlers.
  * Adjust as needed for your actual client implementation.
  */
 export interface EventClient {
-  on(eventName: 'tile', listener: (tile: Tile, timeInfo: TimeInfo) => void): void;
-  on(eventName: 'you', listener: (you: You, timeInfo: TimeInfo) => void): void;
-  on(eventName: 'parcels sensing', listener: (parcels: Parcel[], timeInfo: TimeInfo) => void): void;
-  on(eventName: 'EnemyAgents sensing', listener: (EnemyAgents: EnemyAgent[], timeInfo: TimeInfo) => void): void;
-  on(eventName: 'map', listener: (x: number, y: number, tiles: Tile[]) => void): void;
+    on(eventName: 'tile', listener: (tile: Tile, timeInfo: TimeInfo) => void): void;
+    on(eventName: 'you', listener: (you: You, timeInfo: TimeInfo) => void): void;
+    on(eventName: 'parcels sensing', listener: (parcels: Parcel[], timeInfo: TimeInfo) => void): void;
+    on(eventName: 'EnemyAgents sensing', listener: (EnemyAgents: EnemyAgent[], timeInfo: TimeInfo) => void): void;
+    on(eventName: 'map', listener: (x: number, y: number, tiles: Tile[]) => void): void;
 }
