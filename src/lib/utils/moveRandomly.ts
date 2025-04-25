@@ -1,4 +1,4 @@
-import { MyAgent } from "../MyAgent.js";
+import { MyAgent } from "../../MyAgent.js";
 import type { ClientEvents } from "@unitn-asa/deliveroo-js-client";
 
 // Estrai il tipo corretto del parametro "dir" dalla definizione della funzione `move`

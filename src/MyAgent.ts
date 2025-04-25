@@ -3,19 +3,34 @@ import {
   Agent,
   Parcel,
   Tile,
-  Timestamp
+  Timestamp,
+  sleep
 } from "@unitn-asa/deliveroo-js-client";
 
-import * as lib from "./lib/index.js";
+import { lib } from "./lib/index.js";
 
 export class MyAgent {
   public api: DeliverooApi;
 
-  // Stato interno aggiornato dagli eventi
+  // Raw data dai listeners
   public map: Map<string, Tile> = new Map();
   public you?: Agent;
   public agentsSensing: Agent[] = [];
   public parcelsSensing: Parcel[] = [];
+
+  // Beliefs espliciti
+  public beliefs: {
+    isOnDeliveryPoint: boolean;
+    isOnUnpickedParcel: boolean;
+    isCarryingParcels: boolean;
+    canSeeParcelsOnGround: boolean;
+  } = {
+      isOnDeliveryPoint: false,
+      isOnUnpickedParcel: false,
+      isCarryingParcels: false,
+      canSeeParcelsOnGround: false,
+    };
+
 
   constructor(host: string, token?: string) {
     this.api = new DeliverooApi(host, token);
@@ -46,9 +61,10 @@ export class MyAgent {
 
   async agentLoop(): Promise<void> {
     while (true) {
-      lib.printMap(this);
-      await lib.moveRandomly(this);
-      await new Promise((res) => setTimeout(res, 1000));
+      lib.bdi.updateBeliefs(this);
+      const desires = lib.bdi.generateDesires(this);
+      await lib.bdi.executeIntention(this, desires[0]);
+      await sleep(2000);
     }
   }
 }

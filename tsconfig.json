@@ -13,8 +13,11 @@
     "paths": {
       "@unitn-asa/deliveroo-js-client": [
         "src/types/deliveroo-js-client.d.ts"
+      ],
+      "@unitn-asa/pddl-client": [
+        "src/types/pddl-client.d.ts"
       ]
     }
   },
-  "include": ["src/**/*.ts", "src/types/**/*.d.ts"]
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts", "src/lib/index.ts"]
 }

@@ -1,6 +1,6 @@
 // src/lib/printMap.ts
 
-import type { MyAgent } from "../MyAgent.js";
+import type { MyAgent } from "../../MyAgent.js";
 
 export function printMap(agent: MyAgent): void {
   console.clear();
@@ -17,7 +17,7 @@ export function printMap(agent: MyAgent): void {
   const height = maxY + 1;
 
   const typeSymbols: Record<string, string> = {
-    "0": "- ",
+    "0": "  ",
     "1": ". ",
     "2": "# "
   };
