@@ -1,6 +1,6 @@
 // src/types/pddl-api/index.d.ts
 
-declare module "pddl-api" {
+declare module "@unitn-asa/pddl-client" {
     /**
      * Un passo di piano PDDL
      */
