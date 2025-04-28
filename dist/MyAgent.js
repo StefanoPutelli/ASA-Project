@@ -1,11 +1,14 @@
 import { DeliverooApi, sleep } from "@unitn-asa/deliveroo-js-client";
 import { lib } from "./lib/index.js";
+import { updateGui } from "./lib/gui/gui.js";
+const BUFFER_LENGHT = 100;
 export class MyAgent {
     constructor(host, token) {
         // Raw data dai listeners
         this.map = new Map();
         this.agentsSensing = [];
         this.parcelsSensing = [];
+        this.intentions = [];
         // Beliefs espliciti
         this.beliefs = {
             isOnDeliveryPoint: false,
@@ -16,6 +19,7 @@ export class MyAgent {
             parcelsCarried: [],
             parcelsOnGround: [],
             deliveryPoints: [],
+            agentsWithPredictions: [],
             mapWithAgentObstacles: new Map(),
         };
         this.api = new DeliverooApi(host, token);
@@ -32,7 +36,10 @@ export class MyAgent {
             this.you = agent;
         });
         this.api.on("agents sensing", (agents, ts) => {
-            this.agentsSensing = agents;
+            this.agentsSensing.push(agents);
+            if (this.agentsSensing.length > BUFFER_LENGHT) {
+                this.agentsSensing.shift();
+            }
         });
         this.api.on("parcels sensing", (parcels, ts) => {
             this.parcelsSensing = parcels;
@@ -40,10 +47,11 @@ export class MyAgent {
     }
     async agentLoop() {
         while (true) {
+            updateGui(this);
             lib.bdi.updateBeliefs(this);
             const desire = lib.bdi.generateDesires(this);
             await lib.bdi.executeIntention(this, desire);
-            await sleep(1000);
+            await sleep(1);
         }
     }
 }

@@ -1,3 +1,4 @@
+import { getDirectionOfAgents } from "../utils/getDirOfAgents.js";
 export function updateBeliefs(agent) {
     const you = agent.you;
     if (!you)
@@ -7,13 +8,14 @@ export function updateBeliefs(agent) {
     const parcelsOnGround = agent.parcelsSensing.filter(p => !p.carriedBy);
     const isOnUnpickedParcel = parcelsOnGround.some(p => p.x === you.x && p.y === you.y);
     const deliveryPoints = Array.from(agent.map.values()).filter(tile => tile.type == "2");
+    const agentsWithPredictions = getDirectionOfAgents(agent.agentsSensing);
     const mapWithAgentObstacles = new Map();
     // copia tutti i tile originali
     for (const [key, tile] of agent.map.entries()) {
         mapWithAgentObstacles.set(key, { ...tile });
     }
     // per ogni agente NON io, marca il tile come muro ("0")
-    for (const other of agent.agentsSensing) {
+    for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
         if (other.id === you.id)
             continue;
         const key = `${other.x},${other.y}`;
@@ -32,6 +34,7 @@ export function updateBeliefs(agent) {
         parcelsCarried,
         parcelsOnGround,
         deliveryPoints,
+        agentsWithPredictions,
         mapWithAgentObstacles,
     };
 }

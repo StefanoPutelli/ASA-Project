@@ -9,14 +9,19 @@ import {
 
 import { lib } from "./lib/index.js";
 
+import { updateGui } from "./lib/gui/gui.js";
+
+const BUFFER_LENGHT = 100;
+
 export class MyAgent {
   public api: DeliverooApi;
 
   // Raw data dai listeners
   public map: Map<string, Tile> = new Map();
   public you?: Agent;
-  public agentsSensing: Agent[] = [];
+  public agentsSensing: Agent[][] = [];
   public parcelsSensing: Parcel[] = [];
+  public intentions : string[] = [];
 
   // Beliefs espliciti
   public beliefs: {
@@ -28,6 +33,7 @@ export class MyAgent {
     parcelsCarried: Parcel[];
     parcelsOnGround: Parcel[];
     deliveryPoints: Tile[];  
+    agentsWithPredictions: Array<Agent & { direction: [number, number] }>;
     mapWithAgentObstacles: Map<string, Tile>;
   } = {
       isOnDeliveryPoint: false,
@@ -37,7 +43,8 @@ export class MyAgent {
       carriedScore: 0,
       parcelsCarried: [],
       parcelsOnGround: [],
-      deliveryPoints: [],    
+      deliveryPoints: [], 
+      agentsWithPredictions: [], 
       mapWithAgentObstacles: new Map(),
     };
 
@@ -61,7 +68,10 @@ export class MyAgent {
     });
 
     this.api.on("agents sensing", (agents: Agent[], ts: Timestamp) => {
-      this.agentsSensing = agents;
+      this.agentsSensing.push(agents);
+      if(this.agentsSensing.length > BUFFER_LENGHT){
+        this.agentsSensing.shift();
+      }
     });
 
     this.api.on("parcels sensing", (parcels: Parcel[], ts: Timestamp) => {
@@ -72,13 +82,14 @@ export class MyAgent {
   async agentLoop(): Promise<void> {
 
     while (true) {
-      
-      lib.bdi.updateBeliefs(this);
 
+      updateGui(this);
+
+      lib.bdi.updateBeliefs(this);
       const desire = lib.bdi.generateDesires(this);
-      await lib.bdi.executeIntention(this, desire);
       
-      await sleep(1000);
+      await lib.bdi.executeIntention(this, desire);
+      await sleep(1);
     }
   }
 }

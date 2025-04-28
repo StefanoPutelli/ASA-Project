@@ -15,7 +15,9 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@types/blessed": "^0.1.25",
     "@unitn-asa/deliveroo-js-client": "^2.0.2",
-    "@unitn-asa/pddl-client": "^1.6.1"
+    "@unitn-asa/pddl-client": "^1.6.1",
+    "blessed": "^0.1.81"
   }
 }

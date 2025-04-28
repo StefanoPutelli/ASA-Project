@@ -1,6 +1,7 @@
 // src/lib/beliefs.ts
 import { Tile } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "../../MyAgent.js";
+import { getDirectionOfAgents } from "../utils/getDirOfAgents.js";
 
 export function updateBeliefs(agent: MyAgent): void {
   const you = agent.you;
@@ -12,13 +13,15 @@ export function updateBeliefs(agent: MyAgent): void {
   const isOnUnpickedParcel = parcelsOnGround.some(p => p.x === you.x && p.y === you.y);
   const deliveryPoints = Array.from(agent.map.values()).filter(tile => tile.type == "2");
 
+  const agentsWithPredictions = getDirectionOfAgents(agent.agentsSensing);
+
   const mapWithAgentObstacles = new Map<string, Tile>();
   // copia tutti i tile originali
   for (const [key, tile] of agent.map.entries()) {
     mapWithAgentObstacles.set(key, { ...tile });
   }
   // per ogni agente NON io, marca il tile come muro ("0")
-  for (const other of agent.agentsSensing) {
+  for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
     if (other.id === you.id) continue;
     const key = `${other.x},${other.y}`;
     const t = mapWithAgentObstacles.get(key);
@@ -37,6 +40,7 @@ export function updateBeliefs(agent: MyAgent): void {
     parcelsCarried,
     parcelsOnGround,
     deliveryPoints,
+    agentsWithPredictions,
     mapWithAgentObstacles,
   };
 }
