@@ -24,11 +24,21 @@ export class MyAgent {
     isOnUnpickedParcel: boolean;
     isCarryingParcels: boolean;
     canSeeParcelsOnGround: boolean;
+    carriedScore: number; 
+    parcelsCarried: Parcel[];
+    parcelsOnGround: Parcel[];
+    deliveryPoints: Tile[];  
+    mapWithAgentObstacles: Map<string, Tile>;
   } = {
       isOnDeliveryPoint: false,
       isOnUnpickedParcel: false,
       isCarryingParcels: false,
       canSeeParcelsOnGround: false,
+      carriedScore: 0,
+      parcelsCarried: [],
+      parcelsOnGround: [],
+      deliveryPoints: [],    
+      mapWithAgentObstacles: new Map(),
     };
 
 
@@ -60,11 +70,15 @@ export class MyAgent {
   }
 
   async agentLoop(): Promise<void> {
+
     while (true) {
+      
       lib.bdi.updateBeliefs(this);
-      const desires = lib.bdi.generateDesires(this);
-      await lib.bdi.executeIntention(this, desires[0]);
-      await sleep(2000);
+
+      const desire = lib.bdi.generateDesires(this);
+      await lib.bdi.executeIntention(this, desire);
+      
+      await sleep(1000);
     }
   }
 }

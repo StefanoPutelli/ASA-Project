@@ -1,4 +1,5 @@
 // src/lib/beliefs.ts
+import { Tile } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "../../MyAgent.js";
 
 export function updateBeliefs(agent: MyAgent): void {
@@ -7,8 +8,24 @@ export function updateBeliefs(agent: MyAgent): void {
 
   const tileUnderYou = agent.map.get(`${you.x},${you.y}`);
   const parcelsCarried = agent.parcelsSensing.filter(p => p.carriedBy === you.id);
-  const parcelsOnGround = agent.parcelsSensing.filter(p => p.carriedBy !== you.id);
+  const parcelsOnGround = agent.parcelsSensing.filter(p => !p.carriedBy);
   const isOnUnpickedParcel = parcelsOnGround.some(p => p.x === you.x && p.y === you.y);
+  const deliveryPoints = Array.from(agent.map.values()).filter(tile => tile.type == "2");
+
+  const mapWithAgentObstacles = new Map<string, Tile>();
+  // copia tutti i tile originali
+  for (const [key, tile] of agent.map.entries()) {
+    mapWithAgentObstacles.set(key, { ...tile });
+  }
+  // per ogni agente NON io, marca il tile come muro ("0")
+  for (const other of agent.agentsSensing) {
+    if (other.id === you.id) continue;
+    const key = `${other.x},${other.y}`;
+    const t = mapWithAgentObstacles.get(key);
+    if (t) {
+      mapWithAgentObstacles.set(key, { ...t, type: "0" });
+    }
+  }
 
   // Aggiungiamo questi beliefs come proprietà dell'agente
   agent.beliefs = {
@@ -16,5 +33,12 @@ export function updateBeliefs(agent: MyAgent): void {
     isOnUnpickedParcel,
     isCarryingParcels: parcelsCarried.length > 0,
     canSeeParcelsOnGround: parcelsOnGround.length > 0,
+    carriedScore: parcelsCarried.reduce((sum, current) => sum + current.reward, 0),
+    parcelsCarried,
+    parcelsOnGround,
+    deliveryPoints,
+    mapWithAgentObstacles,
   };
 }
+
+

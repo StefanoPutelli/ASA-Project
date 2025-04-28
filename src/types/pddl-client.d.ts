@@ -5,6 +5,7 @@ declare module "@unitn-asa/pddl-client" {
      * Un passo di piano PDDL
      */
     export interface PddlPlanStep {
+      name: any;
       parallel: boolean;
       action: string;
       args: string[];

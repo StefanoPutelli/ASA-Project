@@ -1,27 +1,40 @@
+import { Parcel, Tile } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "../../MyAgent.js";
+import { gainMultiple, GainPlan } from "../utils/gain.js";
 
-export type Desire = "deliver" | "pickup" | "go-to-deliver" | "go-to" | "explore";
+export type Desire = 
+  | { type: "deliver" }
+  | { type: "pickup"}
+  | { type: "go-to-parcel"; parcel: Parcel }
+  | { type: "go-to-deliver"; point: Tile }
+  | { type: "explore" };
 
-export function generateDesires(agent: MyAgent): Desire[] {
-  const desires: Desire[] = [];
+export function generateDesires(agent: MyAgent): Desire {
   const b = agent.beliefs;
 
-  if (!agent.you) return ["explore"];
+  if (!agent.you) return {type: "explore"};
 
   // 1. Se sto trasportando pacchi e sono sopra un punto di consegna, voglio consegnare subito
-  if (b.isCarryingParcels && b.isOnDeliveryPoint) desires.push("deliver");
+  if (b.isCarryingParcels && b.isOnDeliveryPoint) return {type: "deliver"};
 
   // 2. Se sono sopra un pacco non ancora raccolto, voglio raccoglierlo
-  if (b.isOnUnpickedParcel) desires.push("pickup");
+  if (b.isOnUnpickedParcel) return {type: "pickup"};
 
-  // 3. Se trasporto pacchi ma non sono ancora sul punto di consegna, voglio andarci
-  if (b.isCarryingParcels && !b.isOnDeliveryPoint) desires.push("go-to-deliver");
+  const plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
 
-  // 4. Se vedo pacchi a terra voglio andare a prenderli
-  if (b.canSeeParcelsOnGround) desires.push("go-to");
+  if (plan && plan?.gain > 0) {
+    if (plan.sequence.length > 0) {
+      return  {
+          type: "go-to-parcel",
+          parcel: plan.sequence[0],
+        };
+    }
+    return {
+      type: "go-to-deliver",
+      point: plan.deliveryPoint,
+    };
+  }
 
   // 5. Nessuna altra attività urgente → esploro
-  if (desires.length === 0) desires.push("explore");
-
-  return desires;
+  return {type: "explore"};
 }
