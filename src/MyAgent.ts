@@ -13,7 +13,7 @@ import updateGui from "./lib/gui/gui.js";
 // import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
-const SHOW_GUI = true;
+const SHOW_GUI = false;
 
 export class MyAgent {
   public api: DeliverooApi;
@@ -26,6 +26,7 @@ export class MyAgent {
   public intentions : string[] = [];
   public whereparcelspawns = -1; // 0 = everywhere, 1 = only in specific areas
   public showGui = true;
+  public avgLoopTime = 0;
 
   // Beliefs espliciti
   public beliefs: {
@@ -123,6 +124,7 @@ export class MyAgent {
     this.showGui = SHOW_GUI;
 
     this.startGuiLoop();
+    const lastLoopTimes = [];
 
     while(true) {
 
@@ -130,11 +132,17 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
-
+      const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
       const desire = lib.bdi.generateDesires(this);
-
       await lib.bdi.executeIntention(this, desire);
+      const endTime = Date.now();
+      const elapsedTime = endTime - startTime;
+      lastLoopTimes.push(elapsedTime);
+      if (lastLoopTimes.length > 20) {
+        lastLoopTimes.shift();
+      }
+      this.avgLoopTime = lastLoopTimes.reduce((a, b) => a + b, 0) / lastLoopTimes.length;      
     };
 
   }
