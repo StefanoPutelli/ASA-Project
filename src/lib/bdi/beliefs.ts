@@ -2,7 +2,6 @@
 import { Tile } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "../../MyAgent.js";
 import { getDirectionOfAgents } from "../utils/getDirOfAgents.js";
-import findSpawners from "../utils/findSpawners.js";
 
 export function updateBeliefs(agent: MyAgent): void {
   const you = agent.you;
@@ -43,6 +42,7 @@ export function updateBeliefs(agent: MyAgent): void {
     deliveryPoints,
     agentsWithPredictions,
     mapWithAgentObstacles,
+    exploreTarget: agent.beliefs.exploreTarget,
     // spawnerHotspots : agent.whereparcelspawns === 1 ? (agent.beliefs.spawnerHotspots.length === 0 ? findSpawners(agent) : agent.beliefs.spawnerHotspots) : [], // Se non sono in modalità spawner, mantieni l'array vuoto
   };
 }

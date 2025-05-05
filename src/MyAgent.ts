@@ -37,8 +37,8 @@ export class MyAgent {
     parcelsOnGround: Parcel[];
     deliveryPoints: Tile[];  
     agentsWithPredictions: Array<Agent & { direction: [number, number] }>;
-    mapWithAgentObstacles: Map<string, Tile>;
-    // spawnerHotspots: Tile[]; // Array di tile che sono spawner
+    mapWithAgentObstacles: Map<string, Tile>;    // spawnerHotspots: Tile[]; // Array di tile che sono spawner
+    exploreTarget: Tile | undefined;
   } = {
       isOnDeliveryPoint: false,
       isOnUnpickedParcel: false,
@@ -50,6 +50,7 @@ export class MyAgent {
       deliveryPoints: [], 
       agentsWithPredictions: [], 
       mapWithAgentObstacles: new Map(),
+      exploreTarget: undefined
       // spawnerHotspots: [] // Inizializza come array vuoto
     };
 
@@ -119,7 +120,7 @@ export class MyAgent {
     this.startGuiLoop();
 
     while(true) {
-      
+
       if(!this.you) {
         console.log(this.you);
         await sleep(1000);

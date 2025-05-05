@@ -7,6 +7,10 @@ import { getDirection } from "../utils/getDirection.js";
 export async function executeIntention(agent: MyAgent, desire: Desire): Promise<void> {
   const { api } = agent;
 
+  if(desire.type !== "explore"){
+    agent.beliefs.exploreTarget = undefined;
+  }
+
   switch (desire.type) {
     case "deliver": {
       return new Promise((resolve) => {

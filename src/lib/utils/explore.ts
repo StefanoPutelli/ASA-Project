@@ -63,25 +63,48 @@ export function getCentralTileInOppositeQuadrant(agent: MyAgent): Tile | undefin
 
 export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | undefined {
 
-    if (agent.whereparcelspawns === 0){
-        const bestTile = getCentralTileInOppositeQuadrant(agent);
-        console.log(agent.you)
-        if (agent.you && bestTile){
-            const nextTile = computeDistanceAStar(agent.you.x, agent.you.y, bestTile?.x, bestTile?.y, agent.map);
-            if (nextTile) {
-                return getDirection(agent.you.x, agent.you.y, nextTile.path[1].x, nextTile.path[1].y);
-            }
-        }
-    } else {
-        const bestTile = findSpawners(agent)[0];
-        if (bestTile && agent.you) {
-            const nextTile = computeDistanceAStar(agent.you?.x, agent.you?.y, bestTile?.x, bestTile?.y, agent.map);
-            if (nextTile) {
-                return getDirection(agent.you?.x, agent.you?.y, nextTile.path[1].x, nextTile.path[1].y);
-            }        
-        }
-
+  if (agent.whereparcelspawns === 0) {
+    const bestTile = getCentralTileInOppositeQuadrant(agent);
+    if (agent.you && bestTile) {
+      const nextTile = computeDistanceAStar(agent.you.x, agent.you.y, bestTile?.x, bestTile?.y, agent.beliefs
+        .mapWithAgentObstacles
+      );
+      if (nextTile) {
+        return getDirection(agent.you.x, agent.you.y, nextTile.path[1].x, nextTile.path[1].y);
+      }
     }
-    return undefined;    
+  } else {
+    if (agent.beliefs.exploreTarget === undefined) {
+      const bestTile = findSpawners(agent)[0];
+      if (bestTile) {
+        agent.beliefs.exploreTarget = bestTile;
+      }
+    }
+
+    if (agent.beliefs.exploreTarget && agent.you) {
+      const nextTile = computeDistanceAStar(agent.you?.x, agent.you?.y, agent.beliefs.exploreTarget?.x, agent.beliefs.exploreTarget?.y, agent.beliefs.mapWithAgentObstacles);
+      if (nextTile) {
+        if (nextTile.distance > 0)
+          return getDirection(agent.you?.x, agent.you?.y, nextTile.path[1].x, nextTile.path[1].y);
+        else
+          agent.beliefs.exploreTarget = findSpawners(agent)[1];
+        {
+          const spawnerTiles = findSpawners(agent);
+          const rand = Math.random();
+          let chosenIndex: number;
+          if (rand > 0.8 && spawnerTiles.length > 2) {
+            chosenIndex = 2;
+          } else {
+            chosenIndex = 1;
+          }
+          if (spawnerTiles[chosenIndex]) {
+            agent.beliefs.exploreTarget = spawnerTiles[chosenIndex];
+          }
+        }
+      }
+    }
+
+  }
+  return undefined;
 
 }
