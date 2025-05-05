@@ -30,6 +30,7 @@ export function updateBeliefs(agent: MyAgent): void {
       mapWithAgentObstacles.set(key, { ...t, type: 0 });
     }
   }
+
   // Aggiungiamo questi beliefs come proprietà dell'agente
   agent.beliefs = {
     isOnDeliveryPoint: tileUnderYou?.type == 2,

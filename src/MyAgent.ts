@@ -84,6 +84,15 @@ export class MyAgent {
     });
   }
 
+  async startGuiLoop(){
+    while(true){
+      if(this.showGui){
+        updateGui(this);
+      }
+      await sleep(500);
+    }
+  }
+
   async agentLoop(): Promise<void> {
 
     const {whereparcelspawns, showGui} = await inquirer.prompt([
@@ -107,9 +116,9 @@ export class MyAgent {
     this.whereparcelspawns = whereparcelspawns;
     this.showGui = showGui;
 
-    while(true) {
+    this.startGuiLoop();
 
-      this.showGui ? updateGui(this) : null;
+    while(true) {
 
       lib.bdi.updateBeliefs(this);
       const desire = lib.bdi.generateDesires(this);
