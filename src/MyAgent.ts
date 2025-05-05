@@ -8,8 +8,6 @@ import {
 } from "@unitn-asa/deliveroo-js-client";
 
 import { lib } from "./lib/index.js";
-
-import updateGui from "./lib/gui/gui.js";
 // import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
@@ -93,7 +91,7 @@ export class MyAgent {
   async startGuiLoop(){
     while(true){
       if(this.showGui){
-        updateGui(this);
+        lib.gui.updateGui(this);
       }
       await sleep(500);
     }
