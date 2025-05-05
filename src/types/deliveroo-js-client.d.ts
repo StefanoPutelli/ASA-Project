@@ -30,7 +30,7 @@ export interface Parcel {
 export interface Tile {
   x: number;
   y: number;
-  type: string;
+  type: number;
 }
 
 export interface Timestamp {

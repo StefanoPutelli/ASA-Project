@@ -34,7 +34,7 @@ export function computeDistanceAStar(
   const goalTile = map.get(goalKey);
 
   // Se partenza o arrivo non esistono o sono muri, esci
-  if (!startTile || !goalTile || startTile.type == "0" || goalTile.type == "0") {
+  if (!startTile || !goalTile || startTile.type == 0 || goalTile.type == 0) {
     return undefined;
   }
 
@@ -54,7 +54,7 @@ export function computeDistanceAStar(
     for (const { dx, dy } of deltas) {
       const nx = x + dx, ny = y + dy, key = keyFromXY(nx, ny);
       const tile = map.get(key);
-      if (tile && tile.type != "0") result.push({ x: nx, y: ny });
+      if (tile && tile.type != 0) result.push({ x: nx, y: ny });
     }
     return result;
   };

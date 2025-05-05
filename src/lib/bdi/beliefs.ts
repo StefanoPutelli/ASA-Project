@@ -2,6 +2,7 @@
 import { Tile } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "../../MyAgent.js";
 import { getDirectionOfAgents } from "../utils/getDirOfAgents.js";
+import findSpawners from "../utils/findSpawners.js";
 
 export function updateBeliefs(agent: MyAgent): void {
   const you = agent.you;
@@ -11,7 +12,7 @@ export function updateBeliefs(agent: MyAgent): void {
   const parcelsCarried = agent.parcelsSensing.filter(p => p.carriedBy === you.id);
   const parcelsOnGround = agent.parcelsSensing.filter(p => !p.carriedBy);
   const isOnUnpickedParcel = parcelsOnGround.some(p => p.x === you.x && p.y === you.y);
-  const deliveryPoints = Array.from(agent.map.values()).filter(tile => tile.type == "2");
+  const deliveryPoints = Array.from(agent.map.values()).filter(tile => tile.type == 2);
 
   const agentsWithPredictions = getDirectionOfAgents(agent.agentsSensing);
 
@@ -26,13 +27,12 @@ export function updateBeliefs(agent: MyAgent): void {
     const key = `${other.x},${other.y}`;
     const t = mapWithAgentObstacles.get(key);
     if (t) {
-      mapWithAgentObstacles.set(key, { ...t, type: "0" });
+      mapWithAgentObstacles.set(key, { ...t, type: 0 });
     }
   }
-
   // Aggiungiamo questi beliefs come proprietà dell'agente
   agent.beliefs = {
-    isOnDeliveryPoint: tileUnderYou?.type == "2",
+    isOnDeliveryPoint: tileUnderYou?.type == 2,
     isOnUnpickedParcel,
     isCarryingParcels: parcelsCarried.length > 0,
     canSeeParcelsOnGround: parcelsOnGround.length > 0,
@@ -42,6 +42,7 @@ export function updateBeliefs(agent: MyAgent): void {
     deliveryPoints,
     agentsWithPredictions,
     mapWithAgentObstacles,
+    // spawnerHotspots : agent.whereparcelspawns === 1 ? (agent.beliefs.spawnerHotspots.length === 0 ? findSpawners(agent) : agent.beliefs.spawnerHotspots) : [], // Se non sono in modalità spawner, mantieni l'array vuoto
   };
 }
 

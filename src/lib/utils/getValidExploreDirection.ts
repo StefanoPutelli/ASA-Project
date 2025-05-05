@@ -26,7 +26,7 @@ export function getValidExploreDirection(agent: MyAgent): Direction | null {
     const newY = you.y + dy;
     const tile = agent.map.get(`${newX},${newY}`);
 
-    if (tile && tile.type != "0") {
+    if (tile && tile.type != 0) {
       // Escludi il ritorno alla posizione precedente, se possibile
       if (!lastPos || !(newX === lastPos.x && newY === lastPos.y)) {
         validDirs.push(dir);
@@ -41,7 +41,7 @@ export function getValidExploreDirection(agent: MyAgent): Direction | null {
       const newY = you.y + dy;
       if (newX === lastPos.x && newY === lastPos.y) {
         const tile = agent.map.get(`${newX},${newY}`);
-        if (tile && tile.type !== "0") {
+        if (tile && tile.type !== 0) {
           validDirs.push(dir);
         }
       }

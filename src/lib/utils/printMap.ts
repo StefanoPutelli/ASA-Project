@@ -9,45 +9,34 @@ export function printMapToString(agent: MyAgent): string {
 
   const maxX = Math.max(...tiles.map(t => t.x));
   const maxY = Math.max(...tiles.map(t => t.y));
-  const width = (maxX + 1) * 2; // Double the width
-  const height = (maxY + 1) * 2; // Double the height
+  const width = maxX + 1;
+  const height = maxY + 1;
 
   const typeSymbols: Record<string, string> = {
-    "0": "  ",
-    "1": ". ",
-    "2": "# "
+    "0": " ",
+    "1": ".",
+    "2": "#",
+    "3": "o",
   };
 
   const grid: string[][] = Array.from({ length: height }, () =>
-    Array.from({ length: width }, () => "  ")
+    Array.from({ length: width }, () => " ")
   );
 
   try {
     for (const tile of tiles) {
-      const symbol = typeSymbols[tile.type] ?? "? ";
-      grid[tile.y * 2][tile.x * 2] = symbol;
-      grid[tile.y * 2][tile.x * 2 + 1] = symbol;
-      grid[tile.y * 2 + 1][tile.x * 2] = symbol;
-      grid[tile.y * 2 + 1][tile.x * 2 + 1] = symbol;
+      const symbol = typeSymbols[tile.type] ?? "?";
+      grid[tile.y][tile.x] = symbol;
     }
 
     for (const parcel of agent.parcelsSensing) {
-      grid[parcel.y * 2][parcel.x * 2] = "* ";
-      grid[parcel.y * 2][parcel.x * 2 + 1] = "* ";
-      grid[parcel.y * 2 + 1][parcel.x * 2] = "* ";
-      grid[parcel.y * 2 + 1][parcel.x * 2 + 1] = "* ";
+      grid[parcel.y][parcel.x] = "*";
     }
     for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
-      grid[other.y * 2][other.x * 2] = "X ";
-      grid[other.y * 2][other.x * 2 + 1] = "X ";
-      grid[other.y * 2 + 1][other.x * 2] = "X ";
-      grid[other.y * 2 + 1][other.x * 2 + 1] = "X ";
+      grid[other.y][other.x] = "X";
     }
     if (agent.you) {
-      grid[agent.you.y * 2][agent.you.x * 2] = "@ ";
-      grid[agent.you.y * 2][agent.you.x * 2 + 1] = "@ ";
-      grid[agent.you.y * 2 + 1][agent.you.x * 2] = "@ ";
-      grid[agent.you.y * 2 + 1][agent.you.x * 2 + 1] = "@ ";
+      grid[agent.you.y][agent.you.x] = "@";
     }
 
     let output = "";

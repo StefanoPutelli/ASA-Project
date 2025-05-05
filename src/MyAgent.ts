@@ -9,7 +9,8 @@ import {
 
 import { lib } from "./lib/index.js";
 
-import { updateGui } from "./lib/gui/gui.js";
+import updateGui from "./lib/gui/gui.js";
+import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
 
@@ -22,6 +23,8 @@ export class MyAgent {
   public agentsSensing: Agent[][] = [];
   public parcelsSensing: Parcel[] = [];
   public intentions : string[] = [];
+  public whereparcelspawns = -1; // 0 = everywhere, 1 = only in specific areas
+  public showGui = true;
 
   // Beliefs espliciti
   public beliefs: {
@@ -35,6 +38,7 @@ export class MyAgent {
     deliveryPoints: Tile[];  
     agentsWithPredictions: Array<Agent & { direction: [number, number] }>;
     mapWithAgentObstacles: Map<string, Tile>;
+    // spawnerHotspots: Tile[]; // Array di tile che sono spawner
   } = {
       isOnDeliveryPoint: false,
       isOnUnpickedParcel: false,
@@ -46,6 +50,7 @@ export class MyAgent {
       deliveryPoints: [], 
       agentsWithPredictions: [], 
       mapWithAgentObstacles: new Map(),
+      // spawnerHotspots: [] // Inizializza come array vuoto
     };
 
 
@@ -81,15 +86,37 @@ export class MyAgent {
 
   async agentLoop(): Promise<void> {
 
-    while (true) {
+    const {whereparcelspawns, showGui} = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'whereparcelspawns',
+        message: 'Where do you want the parcels to spawn?',
+        choices: [
+          { name: 'Everywhere', value: 0 },
+          { name: 'Only in specific areas', value: 1 }
+        ],
+        default: 0
+      },
+      {
+        type: 'confirm',
+        name: 'showGui',
+        message: 'Do you want to show the GUI?',
+        default: true
+      }
+    ]);
+    this.whereparcelspawns = whereparcelspawns;
+    this.showGui = showGui;
 
-      updateGui(this);
+    while(true) {
+
+      this.showGui ? updateGui(this) : null;
 
       lib.bdi.updateBeliefs(this);
       const desire = lib.bdi.generateDesires(this);
-      
+
       await lib.bdi.executeIntention(this, desire);
       await sleep(1);
-    }
+    };
+
   }
 }

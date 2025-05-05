@@ -74,6 +74,9 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
 
     case "explore": {
       return new Promise((resolve) => {
+        if(agent.whereparcelspawns === 1){
+          
+        }
         const direction = utils.getValidExploreDirection(agent);
         if (direction) {
           agent.api.emit("move", direction, () => {

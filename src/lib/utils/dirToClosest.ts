@@ -50,7 +50,7 @@ export function getDirectionToClosestParcel(agent: MyAgent): Direction | undefin
   for (const dir of directions) {
     const { x: dx, y: dy } = delta[dir];
     const tile = agent.map.get(`${you.x + dx},${you.y + dy}`);
-    if (tile && tile.type != "0") {
+    if (tile && tile.type != 0) {
       return dir;
     }
   }
@@ -64,7 +64,7 @@ export function getDirectionToClosestDeliveryPoint(agent: MyAgent): Direction | 
   if (!you) return;
 
   // Filtra le tile di consegna (type === "2")
-  const deliveryTiles = Array.from(agent.map.values()).filter(tile => tile.type == "2");
+  const deliveryTiles = Array.from(agent.map.values()).filter(tile => tile.type == 2);
   if (deliveryTiles.length === 0) return;
 
   // Trova quella più vicina (Manhattan)
@@ -95,7 +95,7 @@ export function getDirectionToClosestDeliveryPoint(agent: MyAgent): Direction | 
   for (const dir of directions) {
     const offset = delta[dir];
     const nextTile = agent.map.get(`${you.x + offset.x},${you.y + offset.y}`);
-    if (nextTile && nextTile.type != "0") {
+    if (nextTile && nextTile.type != 0) {
       return dir;
     }
   }
