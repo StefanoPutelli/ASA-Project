@@ -4,7 +4,7 @@ import { MyAgent } from '../../MyAgent.js';
 import { printMapToString } from '../utils/printMap.js';
 
 // Funzione che aggiorna l'interfaccia
-export default async function updateGui(agent: MyAgent) {
+export  async function updateGui(agent: MyAgent) {
 
     // Inizializza Blessed
     const screen = blessed.screen({
