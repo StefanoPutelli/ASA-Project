@@ -10,9 +10,10 @@ import {
 import { lib } from "./lib/index.js";
 
 import updateGui from "./lib/gui/gui.js";
-import inquirer from "inquirer";
+// import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
+const SHOW_GUI = true;
 
 export class MyAgent {
   public api: DeliverooApi;
@@ -61,8 +62,12 @@ export class MyAgent {
     this.api.on("map", (w: number, h: number, tiles: Tile[]) => {
       this.map.clear();
       for (const tile of tiles) {
+        if(tile.type === 3)
+          this.whereparcelspawns = 1;
         this.map.set(`${tile.x},${tile.y}`, tile);
       }
+      if(this.whereparcelspawns === -1)
+        this.whereparcelspawns = 0;
     });
 
     this.api.on("tile", (tile: Tile, ts: Timestamp) => {
@@ -96,33 +101,32 @@ export class MyAgent {
 
   async agentLoop(): Promise<void> {
 
-    const {whereparcelspawns, showGui} = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'whereparcelspawns',
-        message: 'Where the parcels spawn?',
-        choices: [
-          { name: 'Everywhere', value: 0 },
-          { name: 'Only in specific areas', value: 1 }
-        ],
-        default: 0
-      },
-      {
-        type: 'confirm',
-        name: 'showGui',
-        message: 'Do you want to show the GUI?',
-        default: true
-      }
-    ]);
-    this.whereparcelspawns = whereparcelspawns;
-    this.showGui = showGui;
+    // const {whereparcelspawns, showGui} = await inquirer.prompt([
+    //   {
+    //     type: 'list',
+    //     name: 'whereparcelspawns',
+    //     message: 'Where the parcels spawn?',
+    //     choices: [
+    //       { name: 'Everywhere', value: 0 },
+    //       { name: 'Only in specific areas', value: 1 }
+    //     ],
+    //     default: 0
+    //   },
+    //   {
+    //     type: 'confirm',
+    //     name: 'showGui',
+    //     message: 'Do you want to show the GUI?',
+    //     default: true
+    //   }
+    // ]);
+    // this.whereparcelspawns = whereparcelspawns;
+    this.showGui = SHOW_GUI;
 
     this.startGuiLoop();
 
     while(true) {
 
-      if(!this.you) {
-        console.log(this.you);
+      if(!this.you || this.whereparcelspawns === -1){ 
         await sleep(1000);
         continue;
       }
