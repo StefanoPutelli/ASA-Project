@@ -74,19 +74,31 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
 
     case "explore": {
       return new Promise((resolve) => {
-        if(agent.whereparcelspawns === 1){
-          
-        }
-        const direction = utils.getValidExploreDirection(agent);
+
+        const direction = utils.explore(agent);
         if (direction) {
-          agent.api.emit("move", direction, () => {
+          agent.api.emit('move', direction, () => {
             agent.intentions.push("Intention: explore →" + direction);
             resolve();
-          });
+          }) 
         } else {
-          agent.intentions.push("Intention: explore → no valid moves");
-          resolve();
-        }
+            agent.intentions.push("Intention: explore → no valid moves");
+            resolve();
+        } 
+
+        // if(agent.whereparcelspawns === 1){
+          
+        // }
+        // const direction = utils.getValidExploreDirection(agent);
+        // if (direction) {
+        //   agent.api.emit("move", direction, () => {
+        //     agent.intentions.push("Intention: explore →" + direction);
+        //     resolve();
+        //   });
+        // } else {
+        //   agent.intentions.push("Intention: explore → no valid moves");
+        //   resolve();
+        // }
       });
     }
 
