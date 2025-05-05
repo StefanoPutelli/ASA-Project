@@ -123,6 +123,13 @@ export class MyAgent {
 
     this.startGuiLoop();
     const lastLoopTimes = [];
+    let lastTile : {
+      x: number;
+      y: number;
+    } = {} as {
+      x: number;
+      y: number;
+    };
 
     while(true) {
 
@@ -131,9 +138,21 @@ export class MyAgent {
         continue;
       }
       const startTime = Date.now();
+
+      if(lastTile && this.you.x === lastTile.x && this.you.y === lastTile.y){
+        lastTile = {
+          x: this.you.x,
+          y: this.you.y,
+        }
+        continue;
+      }
+
       lib.bdi.updateBeliefs(this);
+
       const desire = lib.bdi.generateDesires(this);
+
       await lib.bdi.executeIntention(this, desire);
+
       const endTime = Date.now();
       const elapsedTime = endTime - startTime;
       lastLoopTimes.push(elapsedTime);
