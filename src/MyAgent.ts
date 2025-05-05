@@ -19,7 +19,7 @@ export class MyAgent {
 
   // Raw data dai listeners
   public map: Map<string, Tile> = new Map();
-  public you?: Agent;
+  public you: Agent = {} as Agent;
   public agentsSensing: Agent[][] = [];
   public parcelsSensing: Parcel[] = [];
   public intentions : string[] = [];
@@ -99,7 +99,7 @@ export class MyAgent {
       {
         type: 'list',
         name: 'whereparcelspawns',
-        message: 'Where do you want the parcels to spawn?',
+        message: 'Where the parcels spawn?',
         choices: [
           { name: 'Everywhere', value: 0 },
           { name: 'Only in specific areas', value: 1 }
@@ -120,11 +120,16 @@ export class MyAgent {
 
     while(true) {
 
+      if(this.you === undefined) {
+        console.log("Waiting for you...");
+        await sleep(1000);
+        continue;
+      }
+
       lib.bdi.updateBeliefs(this);
       const desire = lib.bdi.generateDesires(this);
 
       await lib.bdi.executeIntention(this, desire);
-      await sleep(1);
     };
 
   }
