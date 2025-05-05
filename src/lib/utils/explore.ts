@@ -65,10 +65,11 @@ export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | unde
 
     if (agent.whereparcelspawns === 0){
         const bestTile = getCentralTileInOppositeQuadrant(agent);
+        console.log(agent.you)
         if (agent.you && bestTile){
-            const nextTile = computeDistanceAStar(agent.you?.x, agent.you?.y, bestTile?.x, bestTile?.y, agent.map);
+            const nextTile = computeDistanceAStar(agent.you.x, agent.you.y, bestTile?.x, bestTile?.y, agent.map);
             if (nextTile) {
-                return getDirection(agent.you?.x, agent.you?.y, nextTile.path[1].x, nextTile.path[1].y);
+                return getDirection(agent.you.x, agent.you.y, nextTile.path[1].x, nextTile.path[1].y);
             }
         }
     } else {

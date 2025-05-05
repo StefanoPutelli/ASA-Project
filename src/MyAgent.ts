@@ -119,9 +119,9 @@ export class MyAgent {
     this.startGuiLoop();
 
     while(true) {
-
-      if(this.you) {
-        console.log("Waiting for you...");
+      
+      if(!this.you) {
+        console.log(this.you);
         await sleep(1000);
         continue;
       }
