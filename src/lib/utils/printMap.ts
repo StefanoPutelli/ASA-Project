@@ -23,29 +23,33 @@ export function printMapToString(agent: MyAgent): string {
     Array.from({ length: width }, () => " ")
   );
 
-  try {
-    for (const tile of tiles) {
+  for (const tile of tiles) {
+    try {
       const symbol = typeSymbols[tile.type] ?? "?";
       grid[tile.y][tile.x] = symbol;
-    }
-
-    for (const parcel of agent.parcelsSensing) {
-      grid[parcel.y][parcel.x] = "*";
-    }
-    for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
-      grid[other.y][other.x] = "X";
-    }
-    if (agent.you) {
-      grid[agent.you.y][agent.you.x] = "@";
-    }
-
-    let output = "";
-    for (let row = height - 1; row >= 0; row--) {
-      output += grid[row].join('') + '\n';
-    }
-
-    return output;
-  } catch (error) {
-    return `Errore durante la stampa della mappa: ${error}`;
+    } catch (_e) { }
   }
+
+  for (const parcel of agent.parcelsSensing) {
+    try {
+      grid[parcel.y][parcel.x] = "*";
+    } catch (_e) { }
+  }
+  for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
+    try {
+      grid[other.y][other.x] = "X";
+    } catch (_e) { }
+  }
+  if (agent.you) {
+    try {
+      grid[agent.you.y][agent.you.x] = "@";
+    } catch (_e) { }
+  }
+
+  let output = "";
+  for (let row = height - 1; row >= 0; row--) {
+    output += grid[row].join('') + '\n';
+  }
+
+  return output;
 }
