@@ -120,7 +120,7 @@ export class MyAgent {
 
     while(true) {
 
-      if(this.you === undefined) {
+      if(this.you) {
         console.log("Waiting for you...");
         await sleep(1000);
         continue;

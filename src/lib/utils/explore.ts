@@ -72,9 +72,12 @@ export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | unde
             }
         }
     } else {
-        const nextTile = findSpawners(agent)[0];
-        if (nextTile && agent.you) {
-            return getDirection(agent.you?.x, agent.you?.y, nextTile.x, nextTile.y);
+        const bestTile = findSpawners(agent)[0];
+        if (bestTile && agent.you) {
+            const nextTile = computeDistanceAStar(agent.you?.x, agent.you?.y, bestTile?.x, bestTile?.y, agent.map);
+            if (nextTile) {
+                return getDirection(agent.you?.x, agent.you?.y, nextTile.path[1].x, nextTile.path[1].y);
+            }        
         }
 
     }
