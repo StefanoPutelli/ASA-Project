@@ -94,7 +94,7 @@ export function gainMultiple(
             .map(r => Math.min(r, totalDist))
             .reduce((sum, m) => sum + m, 0);
 
-        const netGain = totalReward - penalty;
+        const netGain = totalReward - (penalty * agent.avgLoopTime / 1000);
 
         // 4) aggiorna il miglior piano
         if (

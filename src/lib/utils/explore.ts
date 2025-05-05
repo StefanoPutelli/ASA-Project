@@ -92,7 +92,7 @@ export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | unde
           const spawnerTiles = findSpawners(agent);
           const rand = Math.random();
           let chosenIndex: number;
-          if (rand > 0.8 && spawnerTiles.length > 2) {
+          if (rand > 0.7 && spawnerTiles.length > 2) {
             chosenIndex = 2;
           } else {
             chosenIndex = 1;
