@@ -3,6 +3,7 @@ import { MyAgent } from "../../MyAgent.js";
 import { computeDistanceAStar } from "./astar.js";
 import { getDirection } from "./getDirection.js";
 import findSpawners from "./findSpawners.js";
+import { getValidExploreDirection } from "./getValidExploreDirection.js";
 
 /**
  * Trova il tile valido più centrale del quadrante opposto a quello in cui si trova l'agente.
@@ -64,13 +65,24 @@ export function getCentralTileInOppositeQuadrant(agent: MyAgent): Tile | undefin
 export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | undefined {
 
   if (agent.whereparcelspawns === 0) {
-    const bestTile = getCentralTileInOppositeQuadrant(agent);
-    if (agent.you && bestTile) {
-      const nextTile = computeDistanceAStar(agent.you.x, agent.you.y, bestTile?.x, bestTile?.y, agent.beliefs
+
+    if (agent.beliefs.exploreTarget === undefined) {
+      const bestTile = getCentralTileInOppositeQuadrant(agent);
+      if (bestTile) {
+        agent.beliefs.exploreTarget = bestTile;
+      }
+    }
+
+    if (agent.you && agent.beliefs.exploreTarget) {
+      const nextTile = computeDistanceAStar(agent.you.x, agent.you.y, agent.beliefs.exploreTarget?.x, agent.beliefs.exploreTarget?.y, agent.beliefs
         .mapWithAgentObstacles
       );
       if (nextTile) {
-        return getDirection(agent.you.x, agent.you.y, nextTile.path[1].x, nextTile.path[1].y);
+        if (nextTile.distance > 0) {
+          return getDirection(agent.you.x, agent.you.y, nextTile.path[1].x, nextTile.path[1].y);
+        } else {
+          agent.beliefs.exploreTarget = undefined;
+        }  
       }
     }
   } else {
