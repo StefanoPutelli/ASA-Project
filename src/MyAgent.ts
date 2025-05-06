@@ -39,6 +39,8 @@ export class MyAgent {
     agentsWithPredictions: Array<Agent & { direction: [number, number] }>;
     mapWithAgentObstacles: Map<string, Tile>;    // spawnerHotspots: Tile[]; // Array di tile che sono spawner
     exploreTarget: Tile | undefined;
+    lastPositions: String[];
+    isInLoop: boolean;
   } = {
       isOnDeliveryPoint: false,
       isOnUnpickedParcel: false,
@@ -50,7 +52,9 @@ export class MyAgent {
       deliveryPoints: [], 
       agentsWithPredictions: [], 
       mapWithAgentObstacles: new Map(),
-      exploreTarget: undefined
+      exploreTarget: undefined,
+      lastPositions: [],
+      isInLoop: false,
       // spawnerHotspots: [] // Inizializza come array vuoto
     };
 
@@ -130,6 +134,10 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
+      if(this.beliefs.isInLoop){ 
+        await sleep(300);
+      }
+      
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
       const desire = lib.bdi.generateDesires(this);

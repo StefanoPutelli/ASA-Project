@@ -30,6 +30,18 @@ export function updateBeliefs(agent: MyAgent): void {
     }
   }
 
+  // --- Memoria ultime 5 posizioni ---
+  const posKey = `${you.x},${you.y}`;
+  const lastPositions = agent.beliefs?.lastPositions ?? [];
+  if (lastPositions.length === 0 || lastPositions[lastPositions.length - 1] !== posKey) {
+    lastPositions.push(posKey);
+    if (lastPositions.length > 5) lastPositions.shift();
+  }
+
+  // --- Loop detection ---
+  const uniquePositions = new Set(lastPositions);
+  const isInLoop = uniquePositions.size <= 2;
+
   // Aggiungiamo questi beliefs come proprietà dell'agente
   agent.beliefs = {
     isOnDeliveryPoint: tileUnderYou?.type == 2,
@@ -43,6 +55,8 @@ export function updateBeliefs(agent: MyAgent): void {
     agentsWithPredictions,
     mapWithAgentObstacles,
     exploreTarget: agent.beliefs.exploreTarget,
+    lastPositions,
+    isInLoop,
     // spawnerHotspots : agent.whereparcelspawns === 1 ? (agent.beliefs.spawnerHotspots.length === 0 ? findSpawners(agent) : agent.beliefs.spawnerHotspots) : [], // Se non sono in modalità spawner, mantieni l'array vuoto
   };
 }
