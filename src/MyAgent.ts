@@ -134,12 +134,13 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
-      if(this.beliefs.isInLoop){ 
-        await sleep(300);
-      }
       
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
+
+      if(this.beliefs.isInLoop){ 
+        await sleep(300);
+      }
       const desire = lib.bdi.generateDesires(this);
       await lib.bdi.executeIntention(this, desire);
       const endTime = Date.now();
