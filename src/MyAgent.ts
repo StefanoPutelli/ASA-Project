@@ -11,7 +11,7 @@ import { lib } from "./lib/index.js";
 // import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
-const SHOW_GUI = false;
+const SHOW_GUI = true;
 
 export class MyAgent {
   public api: DeliverooApi;
