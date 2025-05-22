@@ -7,14 +7,16 @@ import {
   sleep
 } from "@unitn-asa/deliveroo-js-client";
 
+import { Them } from "./lib/com/commons.js";
 import { lib } from "./lib/index.js";
 // import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
-const SHOW_GUI = true;
+const SHOW_GUI = false;
 
 export class MyAgent {
   public api: DeliverooApi;
+  public them : Them | null = null;
 
   // Raw data dai listeners
   public map: Map<string, Tile> = new Map();
@@ -59,8 +61,9 @@ export class MyAgent {
     };
 
 
-  constructor(host: string, token?: string) {
+  constructor(host: string, token: string, them_id: string) {
     this.api = new DeliverooApi(host, token);
+    this.them = new Them(this, them_id);
 
     this.api.on("map", (w: number, h: number, tiles: Tile[]) => {
       this.map.clear();
@@ -134,7 +137,6 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
-      
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
 
