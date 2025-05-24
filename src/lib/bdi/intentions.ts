@@ -3,6 +3,7 @@ import { MyAgent } from "../../MyAgent.js";
 import type { Desire } from "./desires.js";
 import * as utils from "../utils/z.index.js";
 import { getDirection } from "../utils/getDirection.js";
+import { sleep } from "@unitn-asa/deliveroo-js-client";
 
 export async function executeIntention(agent: MyAgent, desire: Desire): Promise<void> {
   const { api } = agent;
@@ -29,6 +30,25 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
           //console.log(response);
           resolve();
         });
+      });
+    }
+
+    case "exit-loop": {
+      return new Promise(async (resolve) => {
+        const direction = utils.getValidExploreDirection(agent);
+        if (direction) {
+          api.emit("move", direction, (response) => {
+            agent.intentions.push("Intention: explore →" + direction);
+            //console.log(response);
+            resolve();
+            return;
+          })
+        } else {
+          //console.log("blocked, sleep");
+          await sleep(300);
+          resolve();
+          return;
+        }
       });
     }
 

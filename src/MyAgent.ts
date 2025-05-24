@@ -132,12 +132,12 @@ export class MyAgent {
     const lastLoopTimes = [];
 
     while(true) {
-      //console.log(this.you.name);
-      ///*
+      console.log(this.you.name);
+      /*
       // memory usage
       const used = process.memoryUsage();
       console.log(`Heap used: ${(used.heapUsed / 1024 / 1024).toFixed(2)} MB`);
-      //*/
+      */
 
       if(!this.you || this.whereparcelspawns === -1){ 
         await sleep(1000);
@@ -146,9 +146,7 @@ export class MyAgent {
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
       // lib.utils.saveMapIfNew(this.map);
-      if(this.beliefs.isInLoop){ 
-        await sleep(300);
-      }
+
       const desire = lib.bdi.generateDesires(this);
 
       await lib.bdi.executeIntention(this, desire);
