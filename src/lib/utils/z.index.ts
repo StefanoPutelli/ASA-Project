@@ -4,3 +4,4 @@ export * from "./dirToClosest.js";
 export * from "./getValidExploreDirection.js";
 export * from "./astar.js";
 export * from './explore.js';
+export * from "./saveMap.js"

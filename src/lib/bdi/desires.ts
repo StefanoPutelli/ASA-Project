@@ -34,7 +34,6 @@ export function generateDesires(agent: MyAgent): Desire {
       point: plan.deliveryPoint,
     };
   }
-
   // 5. Nessuna altra attività urgente → esploro
   return {type: "explore"};
 }

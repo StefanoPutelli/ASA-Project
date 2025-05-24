@@ -7,14 +7,16 @@ import {
   sleep
 } from "@unitn-asa/deliveroo-js-client";
 
+import { Them } from "./lib/com/commons.js";
 import { lib } from "./lib/index.js";
 // import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
-const SHOW_GUI = true;
+const SHOW_GUI = false;
 
 export class MyAgent {
   public api: DeliverooApi;
+  public them : Them | null = null;
 
   // Raw data dai listeners
   public map: Map<string, Tile> = new Map();
@@ -59,8 +61,9 @@ export class MyAgent {
     };
 
 
-  constructor(host: string, token?: string) {
+  constructor(host: string, token: string, them_id: string) {
     this.api = new DeliverooApi(host, token);
+    this.them = new Them(this, them_id);
 
     this.api.on("map", (w: number, h: number, tiles: Tile[]) => {
       this.map.clear();
@@ -129,6 +132,12 @@ export class MyAgent {
     const lastLoopTimes = [];
 
     while(true) {
+      //console.log(this.you.name);
+      ///*
+      // memory usage
+      const used = process.memoryUsage();
+      console.log(`Heap used: ${(used.heapUsed / 1024 / 1024).toFixed(2)} MB`);
+      //*/
 
       if(!this.you || this.whereparcelspawns === -1){ 
         await sleep(1000);
@@ -137,19 +146,29 @@ export class MyAgent {
       
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
-
+      // lib.utils.saveMapIfNew(this.map);
       if(this.beliefs.isInLoop){ 
         await sleep(300);
       }
       const desire = lib.bdi.generateDesires(this);
+
       await lib.bdi.executeIntention(this, desire);
+      
+      // console.log(this.you.name, desire);
+
       const endTime = Date.now();
       const elapsedTime = endTime - startTime;
       lastLoopTimes.push(elapsedTime);
       if (lastLoopTimes.length > 20) {
         lastLoopTimes.shift();
       }
-      this.avgLoopTime = lastLoopTimes.reduce((a, b) => a + b, 0) / lastLoopTimes.length;      
+      this.avgLoopTime = lastLoopTimes.reduce((a, b) => a + b, 0) / lastLoopTimes.length;    
+      
+      if (this.them?.isTalking === false && Math.random() < 0.1) {
+            this.api.emit("say", this.them.them_id, { type: "ask", saluto: "ciaone" }, (response) => {
+                //console.log("Inizio conversazione con", this.them?.them_id, ":", response);
+            });
+      }
     };
 
   }
