@@ -5,6 +5,7 @@ import { gainMultiple, GainPlan } from "../utils/gain.js";
 export type Desire = 
   | { type: "deliver" }
   | { type: "pickup"}
+  | { type: "exit-loop"}
   | { type: "go-to-parcel"; parcel: Parcel }
   | { type: "go-to-deliver"; point: Tile }
   | { type: "explore" };
@@ -20,6 +21,8 @@ export function generateDesires(agent: MyAgent): Desire {
   // 2. Se sono sopra un pacco non ancora raccolto, voglio raccoglierlo
   if (b.isOnUnpickedParcel) return {type: "pickup"};
 
+  if (b.isInLoop) return {type: "exit-loop"};
+
   const plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
 
   if (plan && plan?.gain > 0) {
@@ -34,7 +37,6 @@ export function generateDesires(agent: MyAgent): Desire {
       point: plan.deliveryPoint,
     };
   }
-
   // 5. Nessuna altra attività urgente → esploro
   return {type: "explore"};
 }

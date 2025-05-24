@@ -53,8 +53,8 @@ export interface ClientEvents {
     ids?: string[],
     cb?: (arr: { id: string }[]) => void
   ) => { id: string }[];
-  say: (msg: string, data: any, cb: (status: "successful") => void) => void;
-  ask: (msg: string, data: any, cb: (res: any) => void) => void;
+  say: (toId: string, data: any, cb: (status: "successful") => void) => void;
+  ask: (toId: string, data: any, cb: (res: any) => void) => void;
   shout: (data: any, cb: (res: any) => void) => void;
   parcel: (
     action: "create" | "dispose" | "set",

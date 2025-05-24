@@ -59,12 +59,24 @@ export function gainMultiple(
     const initialCarried = agent.beliefs.parcelsCarried;
     const initialRewards = initialCarried.map(p => p.reward);
 
+    if (agent.whereparcelspawns === 1) {
+        if(parcelsList.length >3){
+            parcelsList.sort((a, b) => {
+                const d1 = computeDistanceAStar(startX, startY, a.x, a.y, agent.map)?.distance;
+                const d2 = computeDistanceAStar(startX, startY, b.x, b.y, agent.map)?.distance;
+                if (d1 === undefined || d2 === undefined) return 0;
+                return d1 - d2;
+            });
+            parcelsList = parcelsList.slice(0,3)
+        }
+    }
+
     // tutte le possibili sotto-sequenze ordinate (incl. [])
     const sequences = generateOrderedSubsets(parcelsList);
-
     let bestPlan: GainPlan | undefined = undefined;
 
     for (const seq of sequences) {
+
         let totalDist = 0;
         let px = startX, py = startY;
         let blocked = false;
@@ -108,7 +120,6 @@ export function gainMultiple(
             };
         }
     }
-
     return bestPlan;
 }
 

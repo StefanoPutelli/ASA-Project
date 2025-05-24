@@ -1,8 +1,15 @@
 import { MyAgent } from './MyAgent.js';
 
-const host = "https://deliveroojs.rtibdi.disi.unitn.it/";
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzYzY0YiIsIm5hbWUiOiJyYWlkZXJzIiwidGVhbUlkIjoiNDFjNmZlIiwidGVhbU5hbWUiOiJyYWlkZXJzIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1Mjk1Mjh9.d3Scu-eKJfcvIuvBSumwwFo8sIDimQwW-isdkNSB9oM";
+const host = "http://192.168.23.242:8080/";
 
-const pippo = new MyAgent(host , token);
+// Recupera il token dal terzo argomento (index 2)
+const token = process.argv[2];
+const them_id = process.argv[3];
 
-pippo.agentLoop();
+if (!token || !them_id) {
+    console.error("❌ Errore: nessun token fornito. Usa: npm start -- <TOKEN>");
+    process.exit(1);
+}
+
+const agent = new MyAgent(host, token, them_id);
+agent.agentLoop();

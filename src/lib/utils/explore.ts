@@ -65,7 +65,7 @@ export function getCentralTileInOppositeQuadrant(agent: MyAgent): Tile | undefin
 export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | undefined {
 
   if (agent.whereparcelspawns === 0) {
-
+    
     if (agent.beliefs.exploreTarget === undefined) {
       const bestTile = getCentralTileInOppositeQuadrant(agent);
       if (bestTile) {
@@ -73,7 +73,7 @@ export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | unde
       }
     }
 
-    if (agent.you && agent.beliefs.exploreTarget) {
+    if (agent.you && agent.beliefs.exploreTarget) {  
       const nextTile = computeDistanceAStar(agent.you.x, agent.you.y, agent.beliefs.exploreTarget?.x, agent.beliefs.exploreTarget?.y, agent.beliefs
         .mapWithAgentObstacles
       );
@@ -83,6 +83,12 @@ export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | unde
         } else {
           agent.beliefs.exploreTarget = undefined;
         }  
+      } else {
+        const dir = getValidExploreDirection(agent);
+        if (dir) {
+          return dir;
+        }
+        console.log("blocked");
       }
     }
   } else {

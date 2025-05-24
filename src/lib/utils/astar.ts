@@ -109,7 +109,6 @@ export function computeDistanceAStar(
       }
     }
   }
-
   // nessun percorso trovato
   return undefined;
 }

@@ -1,12 +1,21 @@
 import { MyAgent } from './MyAgent.js';
 
-const host = "http://192.168.23.248:8080/";
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMwYmNkMSIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ2NDQ4NzExfQ.PHAlkfLPFhza07ChChTwUAYKprZYZmSHpL2C-7yQbpE";
+const p_host = "https://deliveroojs25.azurewebsites.net/";
+const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIyN2JiOCIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ1NTczNzE1fQ.1gv6E1xv-oBmxzXb_Bsp9Vd0vYqZZsMThLEA2CSNxEo";
+const p_them_id = "a33b00"
 
-const pippo = new MyAgent(host , token);
+const polpo = new MyAgent(p_host , p_token, p_them_id);
+polpo.agentLoop();
 
-pippo.agentLoop();
+const s_host = "https://deliveroojs25.azurewebsites.net/";
+const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImEzM2IwMCIsIm5hbWUiOiJzZXBwaWEiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0ODAwNjAxNn0.Dfd_QIEnrBFSRZZ4vAExAOwdrgn63GFDe1_4hLeephI";
+const s_them_id = "b27bb8"
 
+const seppia = new MyAgent(s_host , s_token, s_them_id);
+seppia.agentLoop();
+
+
+/*
 
 const token_list = [
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmMDliNiIsIm5hbWUiOiIxIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0NTcyNTF9.Nps5cxjd81cvtZqtH-SyauqMScBNGiK4hJf2R6KHuso",
@@ -42,3 +51,5 @@ i.agentLoop();
 
 const o = new MyAgent(host , token_list[7]);
 o.agentLoop();
+
+*/
