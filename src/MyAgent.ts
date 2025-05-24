@@ -143,7 +143,6 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
-      
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
       // lib.utils.saveMapIfNew(this.map);
