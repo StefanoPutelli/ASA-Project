@@ -29,7 +29,7 @@ export class MyAgent {
   public whereparcelspawns = -1; // 0 = everywhere, 1 = only in specific areas
   public showGui = true;
   public avgLoopTime = 0;
-
+  public gain_type : string = "base";
   private secret_key : string | null = null; // Chiave segreta per la crittografia, se necessaria
 
   // Beliefs espliciti
@@ -65,10 +65,11 @@ export class MyAgent {
     };
 
 
-  constructor(host: string, token: string, secret_key: string | null = null) {
+  constructor(host: string, token: string, secret_key: string | null = null, type?: string | null) {
     this.api = new DeliverooApi(host, token);
     // if(them_id) this.them = new Them(this, them_id);
     this.secret_key = secret_key;
+    if (type) { this.gain_type = type };
 
     this.api.on("map", (w: number, h: number, tiles: Tile[]) => {
       this.map.clear();
@@ -86,7 +87,7 @@ export class MyAgent {
     });
 
     this.api.on("you", (agent: Agent, ts: Timestamp) => {
-      this.you = agent;
+      if (!this.you) { this.you = agent };
     });
 
     this.api.on("agents sensing", (agents: Agent[], ts: Timestamp) => {
@@ -135,7 +136,6 @@ export class MyAgent {
       const used = process.memoryUsage();
       console.log(`Heap used: ${(used.heapUsed / 1024 / 1024).toFixed(2)} MB`);
       */
-
       if(!this.you || this.whereparcelspawns === -1){ 
         await sleep(1000);
         continue;
@@ -156,7 +156,7 @@ export class MyAgent {
 
       await lib.bdi.executeIntention(this, desire);
       
-      // console.log(this.you.name, desire);
+      //console.log(this.you.name, desire);
 
       const endTime = Date.now();
       const elapsedTime = endTime - startTime;
@@ -165,12 +165,6 @@ export class MyAgent {
         lastLoopTimes.shift();
       }
       this.avgLoopTime = lastLoopTimes.reduce((a, b) => a + b, 0) / lastLoopTimes.length;    
-      
-      if (this.them?.isTalking === false && Math.random() < 0.1) {
-            this.api.emit("say", this.them.them_id, { type: "ask", saluto: "ciaone" }, (response) => {
-                //console.log("Inizio conversazione con", this.them?.them_id, ":", response);
-            });
-      }
     };
 
   }

@@ -59,6 +59,7 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
           resolve();
           return;
         }
+
         const tile = utils.computeDistanceAStar(agent.you?.x, agent.you?.y, desire.parcel.x, desire.parcel.y, agent.beliefs.mapWithAgentObstacles)?.path[1];
         if (!tile) {
           //console.log("no tile");
