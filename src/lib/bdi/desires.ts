@@ -1,6 +1,8 @@
 import { Parcel, Tile } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "../../MyAgent.js";
-import { bestPlanMonteCarlo, GainPlan } from "../utils/gain.js";
+import { bestPlanMonteCarlo } from "../utils/gain_montecarlo.js";
+import { gainMultiple } from "../utils/gain.js";
+import { GainPlan } from "../utils/gain.js";
 
 export type Desire = 
   | { type: "deliver" }
@@ -24,6 +26,7 @@ export function generateDesires(agent: MyAgent): Desire {
   if (b.isInLoop) return {type: "exit-loop"};
 
   const plan: GainPlan | undefined = bestPlanMonteCarlo(b.parcelsOnGround, agent);
+  // const plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
 
   if (plan && plan?.gain > 0) {
     if (plan.sequence.length > 0) {

@@ -9,6 +9,8 @@ import {
 
 import { Them } from "./lib/com/commons.js";
 import { lib } from "./lib/index.js";
+
+import { encrypt, decrypt } from "./lib/utils/cryptostuff.js";
 // import inquirer from "inquirer";
 
 const BUFFER_LENGHT = 100;
@@ -27,6 +29,8 @@ export class MyAgent {
   public whereparcelspawns = -1; // 0 = everywhere, 1 = only in specific areas
   public showGui = true;
   public avgLoopTime = 0;
+
+  private secret_key : string | null = null; // Chiave segreta per la crittografia, se necessaria
 
   // Beliefs espliciti
   public beliefs: {
@@ -61,9 +65,10 @@ export class MyAgent {
     };
 
 
-  constructor(host: string, token: string, them_id: string) {
+  constructor(host: string, token: string, secret_key: string | null = null) {
     this.api = new DeliverooApi(host, token);
-    this.them = new Them(this, them_id);
+    // if(them_id) this.them = new Them(this, them_id);
+    this.secret_key = secret_key;
 
     this.api.on("map", (w: number, h: number, tiles: Tile[]) => {
       this.map.clear();
@@ -94,6 +99,19 @@ export class MyAgent {
     this.api.on("parcels sensing", (parcels: Parcel[], ts: Timestamp) => {
       this.parcelsSensing = parcels;
     });
+
+    this.api.on("msg", (from: string, to: string, data: any, cb?: (res: any) => void) => {
+      if(data.type === "them") {
+        const decripted = decrypt(data.saluto, this.secret_key as string);
+        if( decripted === process.env.SALUTO) {
+          this.them = new Them(this, from);
+          this.them.isTalking = true;
+          if(cb) cb({ status: "ok" });
+        }
+
+      }
+    });
+
   }
 
   async startGuiLoop(){
@@ -106,33 +124,12 @@ export class MyAgent {
   }
 
   async agentLoop(): Promise<void> {
-
-    // const {whereparcelspawns, showGui} = await inquirer.prompt([
-    //   {
-    //     type: 'list',
-    //     name: 'whereparcelspawns',
-    //     message: 'Where the parcels spawn?',
-    //     choices: [
-    //       { name: 'Everywhere', value: 0 },
-    //       { name: 'Only in specific areas', value: 1 }
-    //     ],
-    //     default: 0
-    //   },
-    //   {
-    //     type: 'confirm',
-    //     name: 'showGui',
-    //     message: 'Do you want to show the GUI?',
-    //     default: true
-    //   }
-    // ]);
-    // this.whereparcelspawns = whereparcelspawns;
     this.showGui = SHOW_GUI;
 
     this.startGuiLoop();
     const lastLoopTimes = [];
 
     while(true) {
-      console.log(this.you.name);
       /*
       // memory usage
       const used = process.memoryUsage();
@@ -143,6 +140,14 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
+
+      if(this.them === null && this.secret_key !== null) {
+        console.log("Creating Them instance");
+        this.api.emit("shout", { type: "them", saluto: encrypt(process.env.SALUTO as string, this.secret_key)}, () => {})
+        await sleep(1000);
+        continue;
+      }
+
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
       // lib.utils.saveMapIfNew(this.map);
