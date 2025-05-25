@@ -88,7 +88,8 @@ export class MyAgent {
     });
 
     this.api.on("you", (agent: Agent, ts: Timestamp) => {
-      if (!this.you || Object.keys(this.you).length === 0) { this.you = agent };
+      // if (!this.you || Object.keys(this.you).length === 0) { this.you = agent };
+      this.you = agent;
     });
 
     this.api.on("agents sensing", (agents: Agent[], ts: Timestamp) => {
