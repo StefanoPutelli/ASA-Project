@@ -9,7 +9,7 @@ export function updateBeliefs(agent: MyAgent): void {
 
   const tileUnderYou = agent.map.get(`${you.x},${you.y}`);
   const parcelsCarried = agent.parcelsSensing.filter(p => p.carriedBy === you.id);
-  const parcelsOnGround = agent.parcelsSensing.filter(p => !p.carriedBy);
+  const parcelsOnGround = agent.parcelsSensing.filter(p => !p.carriedBy).filter(p => !agent.them?.blacklistedParcels.includes(p.id));
   const isOnUnpickedParcel = parcelsOnGround.some(p => p.x === you.x && p.y === you.y);
   const deliveryPoints = Array.from(agent.map.values()).filter(tile => tile.type == 2);
 

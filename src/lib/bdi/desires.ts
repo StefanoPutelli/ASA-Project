@@ -33,6 +33,7 @@ export function generateDesires(agent: MyAgent): Desire {
 
   if (plan && plan?.gain > 0) {
     if (plan.sequence.length > 0) {
+      agent.them?.bookMyParcels(plan.sequence, agent);
       return  {
           type: "go-to-parcel",
           parcel: plan.sequence[0],

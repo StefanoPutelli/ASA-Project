@@ -108,7 +108,6 @@ export class MyAgent {
         const decripted = decrypt(data.saluto, this.secret_key as string);
         if( decripted === process.env.SALUTO) {
           this.them = new Them(this, from);
-          this.them.isTalking = true;
           if(cb) cb({ status: "ok" });
         }
       }
