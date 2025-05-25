@@ -1,170 +1,36 @@
-// monteCarloPlanner.ts – Valutazione di piani pickup‑&‑delivery tramite Monte‑Carlo
-// Dipendenze:
-//   - computeDistanceAStar  : funzione che restituisce { distance: number } | undefined
-//   - getClosestDeliveryPoint: trova il Tile di consegna più vicino a (x,y)
-//   - MyAgent (tipi Deliveroo)
-// Usa TypeScript ma compila anche in JS (rimuovi i tipi se necessario)
+// monteCarloPlanner.ts – Planner ottimizzato con Beam Search + penalità di carico
+// Penalità temporale cresce linearmente con il numero di pacchi già caricati.
 
-import { Parcel, Tile } from "@unitn-asa/deliveroo-js-client";
+import type { Parcel, Tile } from "@unitn-asa/deliveroo-js-client";
 import { computeDistanceAStar } from "./astar.js";
 import { getClosestDeliveryPoint } from "./closestDP.js";
-import { MyAgent } from "src/MyAgent.js";
+import type { MyAgent } from "src/MyAgent.js";
 
-/*******************
- * CONFIGURAZIONE  *
- *******************/
+/**************** CONFIG ****************/
 
-/** Velocità di decadimento del reward [punti / sec].
- *  Se λ=1, un pacco da 30 vale 0 dopo 30 s. */
-const LAMBDA = 1; // tuning!
+const DECAY_LAMBDA = 1;        // punti persi per secondo di viaggio
+const LOAD_MULTIPLIER = 100;     // incremento percentuale di penalità per OGNI pacco già a bordo
+const BEAM_WIDTH = 6;          // stati mantenuti per profondità
+const MAX_EXPANSIONS = 120;    // limite globale di espansioni
 
-/** Numero di rollout Monte‑Carlo per piano */
-const DEFAULT_ITERATIONS = 64;
+/************* DISTANCE CACHE ***********/
 
-/** Rumore gaussiano (σ proporzionale alla distanza) per simulare congestione */
-const STD_CONGESTION = 0.25; // 0 = disattivato
-
-/** Numero massimo di pacchi presi in considerazione in una sequenza */
-const MAX_SEQUENCE_LEN = 3;
-
-/** Numero massimo di pacchi candidati (beam width) */
-const TOP_K = 5;
-
-/*******************
- *  TIPI & HELPERS *
- *******************/
-
-interface SimParcel {
-  id: string;
-  x: number;
-  y: number;
-  reward0: number;
-  /** Tempo già trascorso (ms) prima dell'inizio della simulazione */
-  livedMs: number;
-}
-
-/**
- * Cache per le distanze A* (immutevole finché la mappa non cambia).
- * Chiave = "x1,y1|x2,y2".
- */
 class DistanceCache {
-  private readonly map = new Map<string, number>();
-  private readonly gameMap: Map<string, Tile>;
-
-  constructor(gameMapArr: Tile[]) {
-    this.gameMap = new Map<string, Tile>();
-    for (const t of gameMapArr) this.gameMap.set(`${t.x},${t.y}`, t);
-  }
+  private readonly cache = new Map<string, number>();
+  constructor(private readonly map: Map<string, Tile>) {}
 
   get(x1: number, y1: number, x2: number, y2: number): number | undefined {
-    const k = `${x1},${y1}|${x2},${y2}`;
-    let d = this.map.get(k);
+    const key = `${x1},${y1}|${x2},${y2}`;
+    let d = this.cache.get(key);
     if (d === undefined) {
-      d = computeDistanceAStar(x1, y1, x2, y2, this.gameMap)?.distance;
-      if (d !== undefined) this.map.set(k, d);
+      d = computeDistanceAStar(x1, y1, x2, y2, this.map)?.distance;
+      if (d !== undefined) this.cache.set(key, d);
     }
     return d;
   }
 }
 
-/*******************
- *  MONTE-CARLO SIM *
- *******************/
-
-function gaussianNoise(std: number): number {
-  const u = 1 - Math.random();
-  const v = 1 - Math.random();
-  return std * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-}
-
-/** Simula una corsa (rollout) per un piano pickup→DP e restituisce il reward. */
-function simulatePlanOnce(
-  startX: number,
-  startY: number,
-  carried: SimParcel[],
-  pickupSeq: SimParcel[],
-  deliveryPoint: Tile,
-  cache: DistanceCache,
-  stepMs: number
-): number {
-  let timeMs = 0;
-  let cx = startX;
-  let cy = startY;
-
-  const dist = (tx: number, ty: number): number => {
-    const d = cache.get(cx, cy, tx, ty);
-    if (d === undefined) return Infinity;
-    const noisy = d + gaussianNoise(d * STD_CONGESTION);
-    return Math.max(1, Math.round(noisy));
-  };
-
-  // 1) pickup programmati
-  for (const p of pickupSeq) {
-    const d = dist(p.x, p.y);
-    if (!Number.isFinite(d)) return 0; // percorso bloccato
-    timeMs += d * stepMs;
-    cx = p.x;
-    cy = p.y;
-    carried.push({ ...p });
-  }
-
-  // 2) vai al delivery point
-  const dDP = dist(deliveryPoint.x, deliveryPoint.y);
-  if (!Number.isFinite(dDP)) return 0;
-  timeMs += dDP * stepMs;
-
-  // 3) reward residuo
-  let reward = 0;
-  for (const p of carried) {
-    const lifeSec = (p.livedMs + timeMs) / 1000;
-    reward += Math.max(0, p.reward0 - LAMBDA * lifeSec);
-  }
-  return reward;
-}
-
-/*******************
- *  GENERATORE SEQUENZE  *
- *******************/
-
-/**
- *  Restituisce un insieme limitato di sequenze (permutazioni) di pickup.
- *  Invece di enumerare *tutti* i sotto‑insiemi (O(n!)), applichiamo:
- *    1.  Selezione dei TOP_K pacchi col miglior rapporto (reward / distanza)
- *    2.  Permutazioni fino a MAX_SEQUENCE_LEN per tenere l'esplosione sotto controllo.
- */
-function generateCandidateSequences(
-  parcels: Parcel[],
-  youX: number,
-  youY: number,
-  cache: DistanceCache
-): Parcel[][] {
-  /* 1) ranking per reward / distanza dalla posizione attuale */
-  const scored = parcels.map(p => {
-    const d = cache.get(youX, youY, p.x, p.y) ?? Infinity;
-    return { p, score: p.reward / (d + 1) };
-  });
-  scored.sort((a, b) => b.score - a.score);
-  const top = scored.slice(0, TOP_K).map(o => o.p);
-
-  /* 2) generazione permutazioni limitate */
-  const res: Parcel[][] = [[]];
-
-  function backtrack(path: Parcel[], remaining: Parcel[]) {
-    if (path.length === MAX_SEQUENCE_LEN) return;
-    for (let i = 0; i < remaining.length; i++) {
-      const next = remaining[i];
-      const newPath = [...path, next];
-      res.push(newPath);
-      backtrack(newPath, remaining.filter((_, idx) => idx !== i));
-    }
-  }
-  backtrack([], top);
-  return res;
-}
-
-/*******************
- *  API PRINCIPALE  *
- *******************/
+/************** TYPES *******************/
 
 export interface GainPlan {
   gain: number;
@@ -172,70 +38,106 @@ export interface GainPlan {
   deliveryPoint: Tile;
 }
 
+interface PartialState {
+  x: number;
+  y: number;
+  t: number;            // ms trascorsi
+  reward: number;       // valore complessivo (valore pacchi consegnati - penalità)
+  valueSum: number;     // somma reward base consegnati
+  remaining: Parcel[];
+  seq: Parcel[];        // pacchi già consegnati (ordine)
+}
+
+/************ MAIN FUNCTION *************/
+
 export function bestPlanMonteCarlo(
   parcels: Parcel[],
   agent: MyAgent,
-  iterations: number = DEFAULT_ITERATIONS
+  _iterations = 64 // lasciato per compatibilità, non usato
 ): GainPlan | undefined {
   const you = agent.you;
-  if (!you) return undefined;
+  if (!you || parcels.length === 0) return undefined;
 
-  const cache = new DistanceCache(Array.from(agent.map.values()));
+  const map = agent.beliefs.mapWithAgentObstacles ?? agent.map;
+  const cache = new DistanceCache(map);
 
-  const carriedInit: SimParcel[] = agent.beliefs.parcelsCarried.map(p => ({
-    id: p.id,
-    x: you.x,
-    y: you.y,
-    reward0: p.reward,
-    livedMs: 0
-  }));
+  const totalBaseReward = parcels.reduce((s, p) => s + p.reward, 0);
 
-  const sequences = generateCandidateSequences(parcels, you.x, you.y, cache);
+  let best: PartialState | undefined;
+  let bestScore = -Infinity;
+  let expansions = 0;
 
-  let best: GainPlan | undefined;
-  for (const seq of sequences) {
-    const last = seq.length ? seq[seq.length - 1] : undefined;
-    const dp = getClosestDeliveryPoint(last?.x ?? you.x, last?.y ?? you.y, agent);
-    if (!dp) continue;
-
-    const simSeq: SimParcel[] = seq.map(p => ({
-      id: p.id,
-      x: p.x,
-      y: p.y,
-      reward0: p.reward,
-      livedMs: 0
-    }));
-
-    let acc = 0;
-    for (let i = 0; i < iterations; i++) {
-      acc += simulatePlanOnce(
-        you.x,
-        you.y,
-        [...carriedInit],
-        simSeq,
-        dp,
-        cache,
-        agent.avgLoopTime
-      );
+  let beam: PartialState[] = [
+    {
+      x: you.x,
+      y: you.y,
+      t: 0,
+      reward: 0,
+      valueSum: 0,
+      remaining: parcels.slice(),
+      seq: []
     }
-    const avg = acc / iterations;
+  ];
 
-    if (!best || avg > best.gain) {
-      best = { gain: avg, sequence: seq, deliveryPoint: dp };
+  while (beam.length && expansions < MAX_EXPANSIONS) {
+    const newBeam: PartialState[] = [];
+
+    for (const state of beam) {
+      // upper‑bound ottimistico (ignora carico futuro per massimizzare pruning)
+      const optimistic = state.valueSum + (totalBaseReward - state.valueSum) - DECAY_LAMBDA * (state.t / 1000);
+      if (optimistic <= bestScore) continue;
+
+      for (const p of state.remaining) {
+        if (expansions++ >= MAX_EXPANSIONS) break;
+
+        const dPick = cache.get(state.x, state.y, p.x, p.y);
+        if (dPick === undefined) continue;
+
+        const dp = getClosestDeliveryPoint(p.x, p.y, agent);
+        if (!dp) continue;
+        const dDrop = cache.get(p.x, p.y, dp.x, dp.y);
+        if (dDrop === undefined) continue;
+
+                const travelTiles = dPick + dDrop;
+        const currentLoad = state.seq.length + 1; // pacchi che avrai a bordo durante questo tragitto
+        const loadFactor = 1 + currentLoad * LOAD_MULTIPLIER;
+        // viaggio "più lento" se carichi
+        const travelMs = travelTiles * agent.avgLoopTime * loadFactor;
+        const newTime = state.t + travelMs;
+
+        const newValueSum = state.valueSum + p.reward;
+        const newReward = newValueSum - DECAY_LAMBDA * (newTime / 1000);
+
+        const remaining = state.remaining.filter(q => q.id !== p.id);
+        const newState: PartialState = {
+          x: dp.x,
+          y: dp.y,
+          t: newTime,
+          reward: newReward,
+          valueSum: newValueSum,
+          remaining,
+          seq: [...state.seq, p]
+        };
+
+        if (newReward > bestScore) {
+          bestScore = newReward;
+          best = newState;
+        }
+        newBeam.push(newState);
+      }
+      if (expansions >= MAX_EXPANSIONS) break;
     }
+
+    newBeam.sort((a, b) => b.reward - a.reward);
+    beam = newBeam.slice(0, BEAM_WIDTH);
   }
-  return best;
-}
 
-/*******************
- *  ESEMPIO USO    *
- *******************/
-/*
-import { bestPlanMonteCarlo } from "./monteCarloPlanner.js";
-
-const plan = bestPlanMonteCarlo(visibleParcels, myAgent, 64);
-if (plan) {
-  console.log("Miglior piano MC:", plan.gain, plan.sequence.map(p => p.id));
-  // muoviti verso plan.sequence[0] … ecc.
+  if (!best || bestScore <= 0) return undefined;
+  const last = best.seq[best.seq.length - 1];
+  const dp = getClosestDeliveryPoint(last.x, last.y, agent);
+  return {
+    gain: bestScore,
+    sequence: best.seq,
+    deliveryPoint: dp!
+  };
 }
-*/

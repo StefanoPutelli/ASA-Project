@@ -4,11 +4,12 @@ import type { Desire } from "./desires.js";
 import * as utils from "../utils/z.index.js";
 import { getDirection } from "../utils/getDirection.js";
 import { sleep } from "@unitn-asa/deliveroo-js-client";
+import move from "../utils/move.js";
 
 export async function executeIntention(agent: MyAgent, desire: Desire): Promise<void> {
   const { api } = agent;
 
-  if(desire.type !== "explore"){
+  if (desire.type !== "explore") {
     agent.beliefs.exploreTarget = undefined;
   }
 
@@ -37,12 +38,10 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
       return new Promise(async (resolve) => {
         const direction = utils.getValidExploreDirection(agent);
         if (direction) {
-          api.emit("move", direction, (response) => {
-            agent.intentions.push("Intention: explore →" + direction);
-            //console.log(response);
+          move(agent, direction, () => {
+            agent.intentions.push("Intention: exit-loop → " + direction);
             resolve();
-            return;
-          })
+          });
         } else {
           //console.log("blocked, sleep");
           await sleep(300);
@@ -68,9 +67,9 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
         }
         const direction = getDirection(agent.you?.x, agent.you?.y, tile?.x, tile?.y);
         if (direction) {
-          api.emit("move", direction, (response) => {
-            agent.intentions.push("Intention: go-to-parcel →" + direction);
-            //console.log(response);
+          move(agent, direction, () => {
+            agent.intentions.push("Intention: go-to-parcel → " + direction);
+            //console.log("move response");
             resolve();
           });
         } else {
@@ -96,9 +95,9 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
         }
         const direction = getDirection(agent.you?.x, agent.you?.y, tile?.x, tile?.y);
         if (direction) {
-          api.emit("move", direction, (response) => {
-            agent.intentions.push("Intention: go-to-deliver →" + direction);
-            //console.log(response)
+          move(agent, direction, () => {
+            agent.intentions.push("Intention: go-to-deliver → " + direction);
+            //console.log("move response");
             resolve();
           });
         } else {
@@ -114,19 +113,19 @@ export async function executeIntention(agent: MyAgent, desire: Desire): Promise<
 
         const direction = utils.explore(agent);
         if (direction) {
-          agent.api.emit('move', direction, (response) => {
-            agent.intentions.push("Intention: explore →" + direction);
-            //console.log(response);
+          move(agent, direction, () => {
+            agent.intentions.push("Intention: explore → " + direction);
+            //console.log("move response");
             resolve();
-          }) 
+          });
         } else {
-            agent.intentions.push("Intention: explore → no valid moves");
-            //console.log("no direction");
-            resolve();
-        } 
+          agent.intentions.push("Intention: explore → no valid moves");
+          //console.log("no direction");
+          resolve();
+        }
 
         // if(agent.whereparcelspawns === 1){
-          
+
         // }
         // const direction = utils.getValidExploreDirection(agent);
         // if (direction) {

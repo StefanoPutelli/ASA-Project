@@ -65,6 +65,7 @@ export class MyAgent {
     };
 
 
+
   constructor(host: string, token: string, secret_key: string | null = null, type?: string | null) {
     this.api = new DeliverooApi(host, token);
     // if(them_id) this.them = new Them(this, them_id);
@@ -87,7 +88,7 @@ export class MyAgent {
     });
 
     this.api.on("you", (agent: Agent, ts: Timestamp) => {
-      if (!this.you) { this.you = agent };
+      if (!this.you || Object.keys(this.you).length === 0) { this.you = agent };
     });
 
     this.api.on("agents sensing", (agents: Agent[], ts: Timestamp) => {
@@ -109,7 +110,6 @@ export class MyAgent {
           this.them.isTalking = true;
           if(cb) cb({ status: "ok" });
         }
-
       }
     });
 
@@ -140,8 +140,8 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
-
       if(this.them === null && this.secret_key !== null) {
+        console.log(this.them, this.secret_key);
         console.log("Creating Them instance");
         this.api.emit("shout", { type: "them", saluto: encrypt(process.env.SALUTO as string, this.secret_key)}, () => {})
         await sleep(1000);
