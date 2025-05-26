@@ -22,7 +22,7 @@ export function updateBeliefs(agent: MyAgent): void {
   }
   // per ogni agente NON io, marca il tile come muro ("0")
   for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
-    if (other.id === you.id) continue;
+    if (other.id === you.id || other.id === agent.them?.them_id) continue;
     const key = `${other.x},${other.y}`;
     const t = mapWithAgentObstacles.get(key);
     if (t) {
