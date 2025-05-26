@@ -11,9 +11,10 @@ import { Them } from "./lib/com/commons.js";
 import { lib } from "./lib/index.js";
 
 import { encrypt, decrypt } from "./lib/utils/cryptostuff.js";
+import { SingleWaySegment } from "./lib/bdi/beliefs.js";
 // import inquirer from "inquirer";
 
-const BUFFER_LENGHT = 100;
+const BUFFER_LENGHT = 3;
 const SHOW_GUI = false;
 
 export class MyAgent {
@@ -47,6 +48,7 @@ export class MyAgent {
     exploreTarget: Tile | undefined;
     lastPositions: String[];
     isInLoop: boolean;
+    singleWays: SingleWaySegment[] | null; // Array di singleWays
   } = {
       isOnDeliveryPoint: false,
       isOnUnpickedParcel: false,
@@ -62,6 +64,7 @@ export class MyAgent {
       lastPositions: [],
       isInLoop: false,
       // spawnerHotspots: [] // Inizializza come array vuoto
+      singleWays: null // Inizializza come array vuoto
     };
 
 
@@ -156,7 +159,7 @@ export class MyAgent {
 
       await lib.bdi.executeIntention(this, desire);
       
-      console.log(this.you.name, desire);
+      // console.log(this.you.name, desire);
 
       const endTime = Date.now();
       const elapsedTime = endTime - startTime;
