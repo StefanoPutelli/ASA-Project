@@ -119,6 +119,12 @@ export function explore(agent: MyAgent): "up" | "down" | "left" | "right" | unde
             agent.beliefs.exploreTarget = spawnerTiles[chosenIndex];
           }
         }
+      } else {
+        const dir = getValidExploreDirection(agent);
+        if (dir) {
+          return dir;
+        }
+        console.log("blocked");
       }
     }
 
