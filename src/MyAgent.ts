@@ -150,13 +150,13 @@ export class MyAgent {
 
       const startTime = Date.now();
       lib.bdi.updateBeliefs(this);
-      // lib.utils.saveMapIfNew(this.map);
+      //lib.utils.saveMapIfNew(this.map);
 
       const desire = lib.bdi.generateDesires(this);
 
       await lib.bdi.executeIntention(this, desire);
       
-      //console.log(this.you.name, desire);
+      console.log(this.you.name, desire);
 
       const endTime = Date.now();
       const elapsedTime = endTime - startTime;

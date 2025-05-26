@@ -2,21 +2,18 @@ import { Agent, Parcel } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "src/MyAgent.js";
 
 export class Them {
-    public parcelsOnGround: Parcel[] = [];
-    public agentsSensing: Agent[][] = [];
-    public agent: Agent | null = null;
     public them_id: string;
 
     public blacklistedParcels: string[] = [];
 
     private blacklistMyParcel(parcels: Parcel[], me: MyAgent) {
         this.blacklistedParcels = parcels.map(p => p.id);
-        console.log(me.you.name, "Them: blacklisted parcels", this.blacklistedParcels);
+        //console.log(me.you.name, "Them: blacklisted parcels", this.blacklistedParcels);
     }
 
     public bookMyParcels(parcels: Parcel[], me: MyAgent) {
         me.api.emit("say", me.them?.them_id as string, { type: "book-parcel", parcels: parcels}, (res: any) => {
-            console.log(res);
+            //console.log(res);
         });
     }
 

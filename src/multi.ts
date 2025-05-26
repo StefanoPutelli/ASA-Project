@@ -8,14 +8,16 @@ dotenv.config();
 const secret_key = crypto.randomBytes(16).toString('hex'); // 32 caratteri esadecimali = 16 byte
 
 
-const host = process.env.SERVER_URL || "https://deliveroojs25.azurewebsites.net/";
+let host = process.env.SERVER_URL || "https://deliveroojs25.azurewebsites.net/";
 
-const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJkOTM1NyIsIm5hbWUiOiJwb2xwbyIsInRlYW1JZCI6IjExZjBmYiIsInRlYW1OYW1lIjoidGVzdDJAdGVzdC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc0ODEwMjQ3MX0._OZbWDqbta2D4a-mv8Oy0wwSbfYn2b2pMeRt1OIMcLQ";
+host = "http://localhost:8080/";
+
+const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NTA2MyIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4MTkwODQ1fQ.Y1c8KqgPEfCaKK7mm-hsy4bUCrCleWtOhlQKdhb-IKQ";
 
 const polpo = new MyAgent(host , p_token, secret_key);
 polpo.agentLoop();
 
-const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5ZmE0YiIsIm5hbWUiOiJzZXBwaWEiLCJ0ZWFtSWQiOiI0NDg4MGYiLCJ0ZWFtTmFtZSI6InRlc3QyQHRlc3QuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDgxMDI1NjR9.E__p1wdvCBZ0Yc811L617mijDfod2-WqAOxTmzBEXlU";
+const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiYTQwZSIsIm5hbWUiOiJzZXBwaWEiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0ODE5MDg2NH0.Z15_nxAzUqxv_Y3ujoTAe35So8V5gQ8iWoTt4ZClWUM";
 
 const seppia = new MyAgent(host , s_token, secret_key);
 seppia.agentLoop();
