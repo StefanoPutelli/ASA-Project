@@ -7,10 +7,7 @@ dotenv.config();
 // Genera una stringa casuale di 32 caratteri per la chiave segreta
 const secret_key = crypto.randomBytes(16).toString('hex'); // 32 caratteri esadecimali = 16 byte
 
-
 let host = process.env.SERVER_URL || "https://deliveroojs25.azurewebsites.net/";
-
-host = "http://localhost:8080/";
 
 const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NTA2MyIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4MTkwODQ1fQ.Y1c8KqgPEfCaKK7mm-hsy4bUCrCleWtOhlQKdhb-IKQ";
 

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc && node dist/index.js",
-    "multi": "tsc && node dist/multi.js"
+    "multi": "tsc && node dist/multi.js",
+    "spawn": "tsc && node dist/multi_spawn.js"
   },
   "keywords": [],
   "author": "",
