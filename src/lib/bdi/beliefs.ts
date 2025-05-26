@@ -31,19 +31,6 @@ export function updateBeliefs(agent: MyAgent): void {
   const agentsWithPredictions = getDirectionOfAgents(agent.agentsSensing);
 
   ///////////////////////////////
-  // – Mappa con ostacoli agenti –
-  ///////////////////////////////
-  const mapWithAgentObstacles = new Map<string, Tile>();
-  for (const [key, tile] of agent.map.entries()) mapWithAgentObstacles.set(key, { ...tile });
-
-  for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
-    if (other.id === you.id) continue;
-    const key = `${other.x},${other.y}`;
-    const t = mapWithAgentObstacles.get(key);
-    if (t) mapWithAgentObstacles.set(key, { ...t, type: 0 });
-  }
-
-  ///////////////////////////////
   // – Calcolo dei singleWays –
   ///////////////////////////////
   let singleWays: SingleWaySegment[] = [];
@@ -170,6 +157,7 @@ export function updateBeliefs(agent: MyAgent): void {
     }
   });
 
+  let blackListed = agent.beliefs.blackListed;
   agentsWithPredictions.forEach((other: (Agent & {
     direction: [number, number];
   })) => {
@@ -179,10 +167,40 @@ export function updateBeliefs(agent: MyAgent): void {
     })
 
     const isSameDirection = other.direction !== myDirection;
+    if (finded && isSameDirection) {
+      blackListed.set(finded.id, {
+        tile: { x: other.x, y: other.y, type: 0 },
+        expires: Date.now() + 30 * agent.avgLoopTime // scade dopo 5 secondi
+      });
+    }
 
-    if (finded && isSameDirection)
-      console.log(`Agent ${other.name} is in singleWay ${finded?.id} (${finded?.direction}) at (${other.x}, ${other.y})`);
+  })
 
+  ///////////////////////////////
+  // – Mappa con ostacoli agenti –
+  ///////////////////////////////
+  const mapWithAgentObstacles = new Map<string, Tile>();
+  for (const [key, tile] of agent.map.entries()) mapWithAgentObstacles.set(key, { ...tile });
+  for (const other of agent.agentsSensing[agent.agentsSensing.length - 1]) {
+    if (other.id === you.id) continue;
+    const key = `${other.x},${other.y}`;
+    const t = mapWithAgentObstacles.get(key);
+    //check if t is inside singleWay
+    if (t && singleWays.some(sw => sw.tiles.some(t => t.x === other.x && t.y === other.y))) {
+      // Se l'agente è in un singleWay, non lo consideriamo come ostacolo
+      continue;
+    }
+    if (t) mapWithAgentObstacles.set(key, { ...t, type: 0 });
+
+  }
+  singleWays.forEach((sw) => {
+    const tileToRemove = agent.beliefs.blackListed.get(sw.id)?.tile;
+    const expires = agent.beliefs.blackListed.get(sw.id)?.expires;
+    if (tileToRemove && expires && expires > Date.now()) {
+      mapWithAgentObstacles.set(`${tileToRemove.x},${tileToRemove.y}`, { ...tileToRemove, type: 0 })
+    } else if( tileToRemove && expires && expires <= Date.now()) {
+      agent.beliefs.blackListed.delete(sw.id);
+    }
   })
 
 
@@ -202,5 +220,6 @@ export function updateBeliefs(agent: MyAgent): void {
     lastPositions,
     isInLoop,
     singleWays,
+    blackListed: blackListed
   } as const;
 }

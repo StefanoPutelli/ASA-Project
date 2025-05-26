@@ -12,5 +12,7 @@ if (!token) {
 
 const secret_key = process.argv[4] || null;
 
-const agent = new MyAgent(host, token, secret_key);
+const showgui = process.argv[5] || undefined
+
+const agent = new MyAgent(host, token, secret_key, showgui);
 agent.agentLoop();
