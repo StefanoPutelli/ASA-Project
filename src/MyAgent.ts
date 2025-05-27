@@ -135,6 +135,9 @@ export class MyAgent {
     this.startGuiLoop();
     const lastLoopTimes = [];
 
+    await sleep(1000); // Attendi un secondo prima di iniziare il loop principale
+    console.log("Starting " + this.you.name + " loop...");
+
     while (true) {
       /*
       // memory usage
