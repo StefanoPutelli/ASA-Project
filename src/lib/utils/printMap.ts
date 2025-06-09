@@ -2,7 +2,7 @@
 import type { MyAgent } from "../../MyAgent.js";
 
 export function printMapToString(agent: MyAgent): string {
-  const tiles = Array.from(agent.map.values());
+  const tiles = Array.from(agent.beliefs.mapWithAgentObstacles.values());
   if (!tiles.length) {
     return "Mappa non ancora ricevuta.";
   }

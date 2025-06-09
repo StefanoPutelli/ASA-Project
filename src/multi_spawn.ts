@@ -13,14 +13,15 @@ host = "http://192.168.23.242:8080/";
 const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ2NGRhYyIsIm5hbWUiOiJjYW5lIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDgxOTEwNTR9.oQJOmKrJEkvoqNqn-CYyCzODVXxQtAonnjO7tuyEQRw";
 const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwOWIyYyIsIm5hbWUiOiJnYXR0byIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4MTkxMDY2fQ.1Upx-K_ba4kFOzPF1N3vD0CStEx8DfWhvzXDTPlkCqE";
 
-const polpo = { name: "cane", token: p_token}
-const seppia = { name: "gatto", token: s_token}
+const polpo = { name: "polpo", token: p_token}
+const seppia = { name: "seppia", token: s_token}
 
 function spawnProcess(me : {
     name: string;
     token: string;
+    showGui: boolean;
 }){
-    const child = spawn('node', ['dist/index_spawn.js', host, me.token, secret_key], {
+    const child = spawn('node', ['dist/index_spawn.js', host, me.token, secret_key, me.showGui ? "show" : ""], {
         stdio: 'inherit',
         shell: true
     });

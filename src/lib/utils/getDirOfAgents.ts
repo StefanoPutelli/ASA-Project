@@ -1,41 +1,24 @@
 import { Agent } from '@unitn-asa/deliveroo-js-client'; // Adjust the path as needed
 
-const HISTORY_LENGTH_TO_CONSIDER = 5;
+const HISTORY_LENGTH_TO_CONSIDER = 2;
 
 export function getDirectionOfAgents(agents: Agent[][]): Array<Agent & { direction: [number, number] }> {
-    return agents.slice(-HISTORY_LENGTH_TO_CONSIDER).map((agentGroup) => {
-        return agentGroup.map((agent) => {
-            const prev = agentGroup[agentGroup.length - 1];
-            const direction: [number, number] = [0, 0];
-            if (prev.x !== agent.x) {
-                direction[0] = prev.x < agent.x ? 1 : -1;
-            }
-            if (prev.y !== agent.y) {
-                direction[1] = prev.y < agent.y ? 1 : -1;
-            }
-            return { ...agent, direction };
-        });
+    const directions: Array<Agent & { direction: [number, number] }> = [];
+    
+    if (agents.length < HISTORY_LENGTH_TO_CONSIDER) return directions;
+    
+    const latestAgents = agents[agents.length - 1];
+    const previousAgents = agents[agents.length - HISTORY_LENGTH_TO_CONSIDER];
+    
+    for (const agent of latestAgents) {
+        const previousAgent = previousAgents.find((a) => a.id === agent.id);
+        if (!previousAgent) continue;
+        const direction: [number, number] = [
+        Math.floor(agent.x) - Math.floor(previousAgent.x),
+        Math.floor(agent.y) - Math.floor(previousAgent.y)
+        ];
+        directions.push({ ...agent, direction });
     }
-    ).reduce((acc, curr) => {
-        curr.forEach((agent) => {
-            const existingAgent = acc.find(a => a.id === agent.id);
-            if (existingAgent) {
-                existingAgent.direction[0] += agent.direction[0];
-                existingAgent.direction[1] += agent.direction[1];
-            } else {
-                acc.push(agent);
-            }
-        });
-        return acc;
-    }
-    ).map((agent) => {
-        return {
-            ...agent,
-            direction: [
-                Math.sign(agent.direction[0]),
-                Math.sign(agent.direction[1])
-            ]
-        };
-    }
-    );
+    
+    return directions;
 }
