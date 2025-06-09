@@ -1,8 +1,19 @@
 import { MyAgent } from './MyAgent.js';
+import dotenv from 'dotenv';
 
-const host = "https://deliveroojs2.rtibdi.disi.unitn.it/";
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE2MDQyMCIsIm5hbWUiOiJyYWlkZXJzIiwidGVhbUlkIjoiMzIzNGJjIiwidGVhbU5hbWUiOiJyYWlkZXJzIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1MjU0Nzl9.07z_LFl3pegBZ7W01NqHVILhHLlTpNak44QvjalD5W4";
+dotenv.config();
 
-const pippo = new MyAgent(host , token);
+var host = process.env.SERVER_URL || "http://192.168.23.242:8080/";
 
-pippo.agentLoop();
+host = "http://localhost:8080/";
+
+// Recupera il token dal terzo argomento (index 2)
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NTA2MyIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4MTkwODQ1fQ.Y1c8KqgPEfCaKK7mm-hsy4bUCrCleWtOhlQKdhb-IKQ";
+
+// if (!token) {
+//     console.error("❌ Errore: nessun token fornito. Usa: npm start -- <TOKEN>");
+//     process.exit(1);
+// }
+
+const agent = new MyAgent(host, token);
+agent.agentLoop();

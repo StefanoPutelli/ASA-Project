@@ -1,12 +1,26 @@
 import { MyAgent } from './MyAgent.js';
+import dotenv from 'dotenv';
+import crypto from 'crypto';
 
-const host = "http://192.168.23.248:8080/";
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMwYmNkMSIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ2NDQ4NzExfQ.PHAlkfLPFhza07ChChTwUAYKprZYZmSHpL2C-7yQbpE";
+dotenv.config();
 
-const pippo = new MyAgent(host , token);
+// Genera una stringa casuale di 32 caratteri per la chiave segreta
+const secret_key = crypto.randomBytes(16).toString('hex'); // 32 caratteri esadecimali = 16 byte
 
-pippo.agentLoop();
+let host = process.env.SERVER_URL || "https://deliveroojs25.azurewebsites.net/";
 
+const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NTA2MyIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4MTkwODQ1fQ.Y1c8KqgPEfCaKK7mm-hsy4bUCrCleWtOhlQKdhb-IKQ";
+
+const polpo = new MyAgent(host , p_token, secret_key);
+polpo.agentLoop();
+
+const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiYTQwZSIsIm5hbWUiOiJzZXBwaWEiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0ODE5MDg2NH0.Z15_nxAzUqxv_Y3ujoTAe35So8V5gQ8iWoTt4ZClWUM";
+
+const seppia = new MyAgent(host , s_token, secret_key);
+seppia.agentLoop();
+
+
+/*
 
 const token_list = [
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmMDliNiIsIm5hbWUiOiIxIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0NTcyNTF9.Nps5cxjd81cvtZqtH-SyauqMScBNGiK4hJf2R6KHuso",
@@ -42,3 +56,5 @@ i.agentLoop();
 
 const o = new MyAgent(host , token_list[7]);
 o.agentLoop();
+
+*/
