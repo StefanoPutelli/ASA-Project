@@ -166,8 +166,8 @@ export function updateBeliefs(agent: MyAgent): void {
       return sw.tiles.some((t) => t.x === other.x && t.y === other.y);
     })
 
-    const isSameDirection = other.direction !== myDirection;
-    if (finded && isSameDirection) {
+    const isNotSameDirection = other.direction !== myDirection || (other.direction[0] === 0 && other.direction[1] === 0);
+    if (finded && isNotSameDirection) {
       blackListed.set(finded.id, {
         tile: { x: other.x, y: other.y, type: 0 },
         expires: Date.now() + 30 * agent.avgLoopTime // scade dopo 5 secondi

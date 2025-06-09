@@ -8,8 +8,8 @@ dotenv.config();
 const secret_key = crypto.randomBytes(16).toString('hex'); // 32 caratteri esadecimali = 16 byte
 const host = process.env.SERVER_URL || "https://deliveroojs25.azurewebsites.net/";
 
-const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NTA2MyIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4MTkwODQ1fQ.Y1c8KqgPEfCaKK7mm-hsy4bUCrCleWtOhlQKdhb-IKQ";
-const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiYTQwZSIsIm5hbWUiOiJzZXBwaWEiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0ODE5MDg2NH0.Z15_nxAzUqxv_Y3ujoTAe35So8V5gQ8iWoTt4ZClWUM";
+const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2NWI1NiIsIm5hbWUiOiJwb2xwbyIsInRlYW1JZCI6ImU1MjViOSIsInRlYW1OYW1lIjoicmFpZGVycyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4NDE4MzgzfQ.SuwUImEToE4ryXU4D-kAqVnvkZmrqQKcubow4BndZjU";
+const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImYzZTVkZSIsIm5hbWUiOiJzZXBwaWEiLCJ0ZWFtSWQiOiI5MWMwZmQiLCJ0ZWFtTmFtZSI6InJhaWRlcnMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0ODQxODM4OH0.0lImxPecY3gtGdFNASxbuJ4Z5u1OEAUJ5p0xGodxOQM";
 
 const polpo = { name: "polpo", token: p_token, showGui : false}
 const seppia = { name: "seppia", token: s_token, showGui : false}
