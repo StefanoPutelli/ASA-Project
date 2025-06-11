@@ -6,7 +6,7 @@ const host = process.argv[2] || process.env.SERVER_URL || "http://localhost:8080
 const token = process.argv[3];
 
 if (!token) {
-    console.error("❌ Errore: nessun token fornito.");
+    console.error("Errore: nessun token fornito.");
     process.exit(1);
 }
 
