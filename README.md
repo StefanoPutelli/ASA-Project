@@ -29,7 +29,7 @@ src/
 │  ├─ gui/gui.ts               # CLI real-time visualisation
 │  ├─ pddl/pddl.ts             # PDDL
 │  └─ utils/                   # Generic helpers
-│     ├─ astar.ts              # A\* path-finding
+│     ├─ astar.ts              # A* path-finding
 │     ├─ gain.ts               # Reward vs. distance heuristic
 │     ├─ closestDP.ts          # Nearest delivery-point
 │     └─ …                     # Misc utilities
