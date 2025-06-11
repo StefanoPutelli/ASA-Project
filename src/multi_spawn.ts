@@ -15,8 +15,6 @@ const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdiYTQwZSIsIm5hbW
 
 const polpo = { name: "polpo", token: p_token, showGui: false }
 const seppia = { name: "seppia", token: s_token, showGui: false }
-const polpo = { name: "polpo", token: p_token, showGui: false }
-const seppia = { name: "seppia", token: s_token, showGui: false }
 
 function spawnProcess(me : {
     name: string;

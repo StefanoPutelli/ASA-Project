@@ -25,7 +25,7 @@ export async function generateDesires(agent: MyAgent): Promise<Desire> {
 
   if (b.isInLoop) return { type: "exit-loop" };
   
-  if (b.parcelsOnGround.length > 0) {
+  if (b.parcelsOnGround.length > 3) {
     var plan: GainPlan | undefined = await gainMultiplePddl(b.parcelsOnGround, agent);
     console.log("Gain plan:", plan);
   } else {
