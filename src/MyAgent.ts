@@ -29,6 +29,7 @@ export class MyAgent {
   public avgLoopTime = 0;
   public gain_type: string = "base";
   private secret_key: string | null = null; // Chiave segreta per la crittografia, se necessaria
+  public pddl: boolean = false; // Se abilitato, usa PDDL per il calcolo dei piani
 
   // Beliefs espliciti
   public beliefs: {
@@ -74,6 +75,7 @@ export class MyAgent {
     // if(them_id) this.them = new Them(this, them_id);
     this.secret_key = secret_key;
     this.showGui = showgui !== undefined ? showgui : undefined;
+    this.pddl = pddl;
 
     this.api.on("map", (w: number, h: number, tiles: Tile[]) => {
       this.map.clear();

@@ -24,13 +24,16 @@ export async function generateDesires(agent: MyAgent): Promise<Desire> {
   if (b.isOnUnpickedParcel) return { type: "pickup" };
 
   if (b.isInLoop) return { type: "exit-loop" };
-  
-  if (b.parcelsOnGround.length > 3) {
-    var plan: GainPlan | undefined = await gainMultiplePddl(b.parcelsOnGround, agent);
-    console.log("Gain plan:", plan);
+
+  if(agent.pddl) {
+    if (b.parcelsOnGround.length > 3) {
+      var plan: GainPlan | undefined = await gainMultiplePddl(b.parcelsOnGround, agent);
+    } else {
+      var plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
+    }
   } else {
     var plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
-  }
+  }   
 
   if (plan && plan?.gain > 0) {
     if (plan.sequence.length > 0) {

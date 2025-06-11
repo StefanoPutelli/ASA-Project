@@ -43,21 +43,24 @@ const MAX_LOCATIONS = 4000;
 const locId = (x: number, y: number) => `l_${x}_${y}`;
 const parcelId = (i: number) => `p${i}`;
 
-export async function gainMultiplePddl(
-  parcelsList: Parcel[],
-  agent: MyAgent
-): Promise<GainPlan | undefined> {
+export async function gainMultiplePddl(parcelsList: Parcel[], agent: MyAgent): Promise<GainPlan | undefined> {
   const you = agent.you;
   if (!you) return undefined;
 
   const startLoc = locId(you.x, you.y);
 
-  const parcels = parcelsList.map((p, i) => ({
-    parcel: p,
-    id: parcelId(i),
-    loc: locId(p.x, p.y),
-    delivery: getClosestDeliveryPoint(p.x, p.y, agent) as Tile,
-  }));
+  // ---------------------- build parcels array con DP validi --------------
+  const parcels = parcelsList.flatMap((p, i) => {
+    const dp = getClosestDeliveryPoint(p.x, p.y, agent);
+    if (!dp) return []; // scarta pacco se non c'è delivery point raggiungibile
+    return [{
+      parcel: p,
+      id: parcelId(i),
+      loc: locId(p.x, p.y),
+      delivery: dp as Tile,
+    }];
+  });
+  if (parcels.length === 0) return undefined;
 
   // ----------------- costruisci sotto‑grafo rilevante --------------------
   const locationSet = new Map<string, { x: number; y: number }>();
@@ -74,27 +77,29 @@ export async function gainMultiplePddl(
   if (locationSet.size > MAX_LOCATIONS) return undefined;
 
   // ----------------- connected facts ------------------------------------
-  const isFree = (x:number,y:number)=>agent.map.get(`${x},${y}`)?.type!==0;
-  const moves=[[1,0],[-1,0],[0,1],[0,-1]];
-  const connected:string[]=[];
-  for(const [id,{x,y}] of locationSet){
-    for(const [dx,dy] of moves){
-      const nx=x+dx, ny=y+dy; if(!isFree(nx,ny)) continue;
-      const nid=locId(nx,ny); if(!locationSet.has(nid)) continue;
+  const isFree = (x: number, y: number) => agent.map.get(`${x},${y}`)?.type !== 0;
+  const moves = [ [1,0], [-1,0], [0,1], [0,-1] ];
+  const connected: string[] = [];
+  for (const [id, { x, y }] of locationSet) {
+    for (const [dx, dy] of moves) {
+      const nx = x + dx, ny = y + dy;
+      if (!isFree(nx, ny)) continue;
+      const nid = locId(nx, ny);
+      if (!locationSet.has(nid)) continue;
       connected.push(`(connected ${id} ${nid})`);
     }
   }
 
-  // ------------------- INIT & GOAL --------------------------------------
-  const locationObjects=[...locationSet.keys()].join(" ");
-  const parcelObjects=parcels.map(p=>p.id).join(" ");
-  const parcelInits=parcels.map(p=>`(parcel-at ${p.id} ${p.loc})`).join("\n         ");
+  // --------------------- INIT & GOAL ------------------------------------
+  const locationObjects = [...locationSet.keys()].join(" ");
+  const parcelObjects = parcels.map(p => p.id).join(" ");
+  const parcelInits = parcels.map(p => `(parcel-at ${p.id} ${p.loc})`).join("\n         ");
 
-  const dpSet=new Set<string>();
-  parcels.forEach(p=>dpSet.add(locId(p.delivery.x,p.delivery.y)));
-  const dpFacts=[...dpSet].map(id=>`(is-dp ${id})`).join("\n         ");
+  const dpSet = new Set<string>();
+  parcels.forEach(p => dpSet.add(locId(p.delivery.x, p.delivery.y)));
+  const dpFacts = [...dpSet].map(id => `(is-dp ${id})`).join("\n         ");
 
-  const goalDelivered=parcels.map(p=>`(delivered ${p.id})`).join("\n            ");
+  const goalDelivered = parcels.map(p => `(delivered ${p.id})`).join("\n            ");
 
   const PROBLEM = `
 (define (problem deliveroo-instance)
@@ -111,40 +116,46 @@ export async function gainMultiplePddl(
 )`;
 
   // ------------------- chiamata planner ---------------------------------
-  let steps:PddlPlanStep[];
-  try { steps=await onlineSolver(DOMAIN, PROBLEM); }
-  catch(err){ console.error("[PDDL] onlineSolver error",err); return undefined; }
-  if(!steps?.length) return undefined;
+  let steps: PddlPlanStep[];
+  try {
+    steps = await onlineSolver(DOMAIN, PROBLEM);
+  } catch (err) {
+    console.error("[PDDL] onlineSolver error", err);
+    return undefined;
+  }
+  if (!steps?.length) return undefined;
 
   // --------------- parsing pickup & delivery ----------------------------
-  const pickSequence:Parcel[]=[];
-  for(const s of steps){
-    if(s.action.toLowerCase()==="pickup"){
-      const pid=s.args[0].toLowerCase();
-      const found=parcels.find(p=>p.id===pid)?.parcel;
-      if(found) pickSequence.push(found);
+  const pickSequence: Parcel[] = [];
+  for (const s of steps) {
+    if (s.action.toLowerCase() === "pickup") {
+      const pid = s.args[0].toLowerCase();
+      const found = parcels.find(p => p.id === pid)?.parcel;
+      if (found) pickSequence.push(found);
     }
   }
-  const lastDeliver=[...steps].reverse().find(s=>s.action.toLowerCase()==="deliver");
-  if(!lastDeliver) return undefined;
-  const dpId=lastDeliver.args[1]; // seconda argomento = location
-  const nums=dpId.match(/\d+/g);
-  if(!nums||nums.length<2) return undefined;
-  const deliveryPoint:Tile={x:parseInt(nums[0]),y:parseInt(nums[1])} as Tile;
+  const lastDeliver = [...steps].reverse().find(s => s.action.toLowerCase() === "deliver");
+  if (!lastDeliver) return undefined;
+  const dpId = lastDeliver.args[1]; // location arg
+  const nums = dpId.match(/\d+/g);
+  if (!nums || nums.length < 2) return undefined;
+  const deliveryPoint: Tile = { x: parseInt(nums[0]), y: parseInt(nums[1]) } as Tile;
 
   // ------------------- gain --------------------------------------------
-  let totalDist=0; let px=you.x, py=you.y;
-  for(const p of pickSequence){
-    const d=computeDistanceAStar(px,py,p.x,p.y,agent.beliefs.mapWithAgentObstacles)?.distance;
-    if(d===undefined) return undefined; totalDist+=d; px=p.x; py=p.y;
+  let totalDist = 0; let px = you.x, py = you.y;
+  for (const p of pickSequence) {
+    const d = computeDistanceAStar(px, py, p.x, p.y, agent.beliefs.mapWithAgentObstacles)?.distance;
+    if (d === undefined) return undefined;
+    totalDist += d; px = p.x; py = p.y;
   }
-  const d2=computeDistanceAStar(px,py,deliveryPoint.x,deliveryPoint.y,agent.beliefs.mapWithAgentObstacles)?.distance;
-  if(d2===undefined) return undefined; totalDist+=d2;
+  const d2 = computeDistanceAStar(px, py, deliveryPoint.x, deliveryPoint.y, agent.beliefs.mapWithAgentObstacles)?.distance;
+  if (d2 === undefined) return undefined;
+  totalDist += d2;
 
-  const rewards=[...agent.beliefs.parcelsCarried.map(p=>p.reward), ...pickSequence.map(p=>p.reward)];
-  const totalReward=rewards.reduce((s,r)=>s+r,0);
-  const penalty=rewards.reduce((s,r)=>s+Math.min(r,totalDist),0);
-  const netGain=totalReward-(penalty*agent.avgLoopTime)/1000;
+  const rewards = [...agent.beliefs.parcelsCarried.map(p => p.reward), ...pickSequence.map(p => p.reward)];
+  const totalReward = rewards.reduce((s, r) => s + r, 0);
+  const penalty = rewards.reduce((s, r) => s + Math.min(r, totalDist), 0);
+  const netGain = totalReward - (penalty * agent.avgLoopTime) / 1000;
 
-  return {gain:Math.max(0,netGain), sequence:pickSequence, deliveryPoint} as GainPlan;
+  return { gain: Math.max(0, netGain), sequence: pickSequence, deliveryPoint } as GainPlan;
 }
