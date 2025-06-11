@@ -72,7 +72,7 @@ export class MyAgent {
       blackListed: new Map()
     };
 
-  constructor(host: string, token: string, secret_key: string | null = null, showgui: string | undefined = undefined) {
+  constructor(host: string, token: string, secret_key: string | null = null, showgui: string | undefined = undefined, pddl: boolean = false) {
     this.api = new DeliverooApi(host, token);
     // if(them_id) this.them = new Them(this, them_id);
     this.secret_key = secret_key;

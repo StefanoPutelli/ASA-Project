@@ -14,12 +14,16 @@ const s_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImYzZTVkZSIsIm5hbW
 const polpo = { name: "polpo", token: p_token, showGui: false }
 const seppia = { name: "seppia", token: s_token, showGui: false }
 
+const pddl = process.argv[2] === "--pddl" ? "pddl" : "nopddl";
+
+
+
 function spawnProcess(me : {
     name: string;
     token: string;
     showGui: boolean;
 }){
-    const child = spawn('node', ['dist/index_spawn.js', host, me.token, secret_key, me.showGui ? "show" : ""], {
+    const child = spawn('node', ['dist/index_spawn.js', host, me.token, secret_key, me.showGui ? "show" : "noshow", pddl], {
         stdio: 'inherit',
         shell: true
     });
