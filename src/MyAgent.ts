@@ -7,14 +7,11 @@ import {
   sleep
 } from "@unitn-asa/deliveroo-js-client";
 
-import { Them } from "./lib/com/commons.js";
 import { lib } from "./lib/index.js";
 
-import { encrypt, decrypt } from "./lib/utils/cryptostuff.js";
+import { Them } from "./lib/com/comunication.js";
 import { SingleWaySegment } from "./lib/bdi/beliefs.js";
-// import inquirer from "inquirer";
 
-const BUFFER_LENGHT = 3;
 
 export class MyAgent {
   public api: DeliverooApi;
@@ -100,7 +97,7 @@ export class MyAgent {
 
     this.api.on("agents sensing", (agents: Agent[], ts: Timestamp) => {
       this.agentsSensing.push(agents);
-      if (this.agentsSensing.length > BUFFER_LENGHT) {
+      if (this.agentsSensing.length > 3) {
         this.agentsSensing.shift();
       }
     });
@@ -111,7 +108,7 @@ export class MyAgent {
 
     this.api.on("msg", (from: string, to: string, data: any, cb?: (res: any) => void) => {
       if (data.type === "them") {
-        const decripted = decrypt(data.saluto, this.secret_key as string);
+        const decripted = lib.utils.decrypt(data.saluto, this.secret_key as string);
         if (decripted === process.env.SALUTO) {
           this.them = new Them(this, from);
           if (cb) cb({ status: "ok" });
@@ -151,7 +148,7 @@ export class MyAgent {
       if (this.them === null && this.secret_key !== null) {
         console.log(this.them, this.secret_key);
         console.log("Creating Them instance");
-        this.api.emit("shout", { type: "them", saluto: encrypt(process.env.SALUTO as string, this.secret_key) }, () => { })
+        this.api.emit("shout", { type: "them", saluto: lib.utils.encrypt(process.env.SALUTO as string, this.secret_key) }, () => { })
         await sleep(1000);
         continue;
       }
