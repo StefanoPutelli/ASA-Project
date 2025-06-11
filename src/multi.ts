@@ -23,7 +23,7 @@ function spawnProcess(me : {
     token: string;
     showGui: boolean;
 }){
-    const child = spawn('node', ['dist/index_spawn.js', host, me.token, secret_key, me.showGui ? "show" : "noshow", pddl], {
+    const child = spawn('node', ['dist/spawn.js', host, me.token, secret_key, me.showGui ? "show" : "noshow", pddl], {
         stdio: 'inherit',
         shell: true
     });

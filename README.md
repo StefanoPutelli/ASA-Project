@@ -34,9 +34,9 @@ src/
 │     ├─ closestDP.ts          # Nearest delivery-point
 │     └─ …                     # Misc utilities
 ├─ MyAgent.ts                  # Concrete agent class
-├─ index.ts                    # Run 1 agent – competitive
-├─ index_spawn.ts              # Run 1 agent with options
-└─ multi_spawn.ts              # Run 2 cooperating agents
+├─ single.ts                   # Run 1 agent 
+├─ spawn.ts                    # Run agent process
+└─ multi.ts                    # Run 2 cooperating agents
 
 ````
 

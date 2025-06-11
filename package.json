@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js",
-    "startpddl": "tsc && node dist/index.js --pddl",
+    "start": "tsc && node dist/single.js",
+    "startpddl": "tsc && node dist/single.js --pddl",
 
-    "spawn": "tsc && node dist/multi_spawn.js",
-    "spawnpddl": "tsc && node dist/multi_spawn.js --pddl"
+    "spawn": "tsc && node dist/multi.js",
+    "spawnpddl": "tsc && node dist/multi.js --pddl"
   },
   "keywords": [],
   "author": "",
