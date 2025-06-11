@@ -10,9 +10,12 @@ if (!token) {
     process.exit(1);
 }
 
-const secret_key = process.argv[4] || null;
+const secret_key = process.argv[4] === "none" ? null : process.argv[4];
 
 const showgui = process.argv[5] || undefined
 
-const agent = new MyAgent(host, token, secret_key, showgui);
+const pddl = process.argv[6] === "pddl" ? true : false;
+
+
+const agent = new MyAgent(host, token, secret_key, showgui, pddl);
 agent.agentLoop();

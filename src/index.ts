@@ -1,19 +1,37 @@
-import { MyAgent } from './MyAgent.js';
 import dotenv from 'dotenv';
+import { spawn } from 'child_process';
 
 dotenv.config();
 
-var host = process.env.SERVER_URL || "http://192.168.23.242:8080/";
+var host = process.env.SERVER_URL || "https://deliveroojs25.azurewebsites.net/";
 
-host = "http://localhost:8080/";
+const p_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2NWI1NiIsIm5hbWUiOiJwb2xwbyIsInRlYW1JZCI6ImU1MjViOSIsInRlYW1OYW1lIjoicmFpZGVycyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4NDE4MzgzfQ.SuwUImEToE4ryXU4D-kAqVnvkZmrqQKcubow4BndZjU";
 
-// Recupera il token dal terzo argomento (index 2)
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NTA2MyIsIm5hbWUiOiJwb2xwbyIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ4MTkwODQ1fQ.Y1c8KqgPEfCaKK7mm-hsy4bUCrCleWtOhlQKdhb-IKQ";
+const polpo = { name: "polpo", token: p_token, showGui: false }
 
-// if (!token) {
-//     console.error("❌ Errore: nessun token fornito. Usa: npm start -- <TOKEN>");
-//     process.exit(1);
-// }
+const pddl = process.argv[2] === "--pddl" ? "pddl" : "nopddl";
 
-const agent = new MyAgent(host, token);
-agent.agentLoop();
+console.log(pddl)
+
+function spawnProcess(me: {
+    name: string;
+    token: string;
+    showGui: boolean;
+}) {
+    const child = spawn('node', ['dist/index_spawn.js', host, me.token, "none", me.showGui ? "show" : "noshow", pddl], {
+        stdio: 'inherit',
+        shell: true
+    });
+
+    child.on('error', (err) => {
+        console.error(`Errore durante lo spawn del processo: ${err.message}`);
+    });
+
+    child.on('exit', (code) => {
+        console.log(`Processo terminato con codice: ${code}`);
+    });
+}
+
+spawnProcess(polpo);
+
+

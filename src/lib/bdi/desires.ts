@@ -2,6 +2,7 @@ import { Parcel, Tile } from "@unitn-asa/deliveroo-js-client";
 import { MyAgent } from "../../MyAgent.js";
 import { gainMultiple } from "../utils/gain.js";
 import { GainPlan } from "../utils/gain.js";
+import { gainMultiplePddl } from "../pddl/pddl.js";
 
 export type Desire =
   | { type: "deliver" }
@@ -11,7 +12,7 @@ export type Desire =
   | { type: "go-to-deliver"; point: Tile }
   | { type: "explore" };
 
-export function generateDesires(agent: MyAgent): Desire {
+export async function generateDesires(agent: MyAgent): Promise<Desire> {
   const b = agent.beliefs;
 
   if (!agent.you) return { type: "explore" };
@@ -24,7 +25,15 @@ export function generateDesires(agent: MyAgent): Desire {
 
   if (b.isInLoop) return { type: "exit-loop" };
 
-  var plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
+  if(agent.pddl) {
+    if (b.parcelsOnGround.length > 3) {
+      var plan: GainPlan | undefined = await gainMultiplePddl(b.parcelsOnGround, agent);
+    } else {
+      var plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
+    }
+  } else {
+    var plan: GainPlan | undefined = gainMultiple(b.parcelsOnGround, agent);
+  }   
 
   if (plan && plan?.gain > 0) {
     if (plan.sequence.length > 0) {
