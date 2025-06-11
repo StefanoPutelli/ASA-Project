@@ -30,6 +30,7 @@ export class MyAgent {
   public gain_type: string = "base";
   private secret_key: string | null = null; // Chiave segreta per la crittografia, se necessaria
   public pddl: boolean = false; // Se abilitato, usa PDDL per il calcolo dei piani
+  public them_check: boolean = false; // Indica se il Them è stato verificato
 
   // Beliefs espliciti
   public beliefs: {
@@ -114,7 +115,10 @@ export class MyAgent {
         if (decripted === process.env.SALUTO) {
           this.them = new Them(this, from);
           if (cb) cb({ status: "ok" });
+          this.api.emit("say", this.them.them_id, { type: "them_check" }, () => { });
         }
+      } else if (data.type === "them_check") {
+        this.them_check = true;
       }
     });
 
@@ -147,8 +151,7 @@ export class MyAgent {
         await sleep(1000);
         continue;
       }
-      if (this.them === null && this.secret_key !== null) {
-        console.log(this.them, this.secret_key);
+      if (this.them_check === false && this.secret_key !== null) {
         console.log("Creating Them instance");
         this.api.emit("shout", { type: "them", saluto: lib.utils.encrypt(process.env.SALUTO as string, this.secret_key) }, () => { })
         await sleep(1000);
