@@ -17,26 +17,26 @@ It works on Deliveroojs, the simulated environment provided by the course.
 ```
 
 src/
-├─ types/                      # Ambient typings for external libs
-│  ├─ deliveroo-js-client.d.ts # Deliveroo client API
-│  └─ pddl-client.d.ts         # PDDL planner client API
+├─ types/                          # Ambient typings for external libs
+│  ├─ deliveroo-js-client.d.ts     # Deliveroo client API
+│  └─ pddl-client.d.ts             # PDDL planner client API
 ├─ lib/
-│  ├─ bdi/                     # Core BDI modules
-│  │  ├─ beliefs.ts            # Percepts → internal state
-│  │  ├─ desires.ts            # Goal generation & refresh
-│  │  └─ intentions.ts         # Plan execution queue
-│  ├─ com/commons.ts           # Inter-agent protocol helpers
-│  ├─ gui/gui.ts               # CLI real-time visualisation
-│  ├─ pddl/pddl.ts             # PDDL
-│  └─ utils/                   # Generic helpers
-│     ├─ astar.ts              # A* path-finding
-│     ├─ gain.ts               # Reward vs. distance heuristic
-│     ├─ closestDP.ts          # Nearest delivery-point
-│     └─ …                     # Misc utilities
-├─ MyAgent.ts                  # Concrete agent class
-├─ single.ts                   # Run 1 agent 
-├─ spawn.ts                    # Run agent process
-└─ multi.ts                    # Run 2 cooperating agents
+│  ├─ bdi/                         # Core BDI modules
+│  │  ├─ beliefs.ts                # Percepts → internal state
+│  │  ├─ desires.ts                # Goal generation & refresh
+│  │  └─ intentions.ts             # Plan execution queue
+│  ├─ com/commons.ts               # Inter-agent protocol helpers
+│  ├─ gui/gui.ts                   # CLI real-time visualisation
+│  ├─ pddl/pddl.ts                 # PDDL
+│  └─ utils/                       # Generic helpers
+│     ├─ astar.ts                  # A* path-finding
+│     ├─ gain.ts                   # Reward vs. distance heuristic
+│     ├─ closestDP.ts              # Nearest delivery-point
+│     └─ …                         # Misc utilities
+├─ MyAgent.ts                      # Concrete agent class
+├─ single.ts                       # Run 1 agent 
+├─ spawn.ts                        # Run agent process
+└─ multi.ts                        # Run 2 cooperating agents
 
 ````
 
@@ -65,11 +65,13 @@ Edit `.env` in the project root (optional):
 SERVER_URL = "http://localhost:8080/"
 SALUTO = "Hi from Trento!"
 PAAS_HOST = "http://192.168.178.54:5001"
+SHOW_GUI = false
 ````
 
 Any value left undefined falls back to the library defaults.
 
-> From each launch script you can enable the optional terminal GUI for real-time visuals. Just remember to activate it for one agent at a time.
+> From each launch script you can enable the optional terminal GUI for real-time visuals. Just remember to activate it for one agent at a time. 
+Terminal GUI conflicts with PDDL client logs, please use it only in competitive mode.
 
 
 
