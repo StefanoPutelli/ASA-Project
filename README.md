@@ -69,4 +69,7 @@ PAAS_HOST = "http://192.168.178.54:5001"
 
 Any value left undefined falls back to the library defaults.
 
+> From each launch script you can enable the optional terminal GUI for real-time visuals. Just remember to activate it for one agent at a time.
+
+
 
